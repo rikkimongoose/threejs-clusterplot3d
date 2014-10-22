@@ -1,0 +1,285 @@
+<html>
+    <head>
+    	<title>My first Three.js app</title>
+	    <style>
+	    	canvas { width: 100%; height: 100% }
+	    </style>
+	    <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
+		<script src="http://code.jquery.com/ui/1.10.2/jquery-ui.js"></script>
+		<link rel=stylesheet href="http://code.jquery.com/ui/1.10.2/themes/smoothness/jquery-ui.css" />
+
+		<script src="js/three.min.js"></script>
+		<script src="js/Detector.js"></script>
+		<script src="js/Stats.js"></script>
+		<script src="js/OrbitControls.js"></script>
+		<script src="js/THREEx.KeyboardState.js"></script>
+		<script src="js/THREEx.FullScreen.js"></script>
+		<script src="js/THREEx.WindowResize.js"></script>
+
+		<script src="js/3dplotter.js"></script>
+	</head>
+	<body>
+	<div id="ThreeJS" style="z-index: 1; position: absolute; left:0px; top:0px"></div>
+	<script>
+		// MAIN
+
+		// standard global variables
+		var container, scene, camera, renderer, controls, stats;
+		var keyboard = new THREEx.KeyboardState();
+		var clock = new THREE.Clock();
+
+		var PLOT_TYPE =
+		{
+			ITEM :
+			{
+				SPHERE : 0,
+				CUBE : 1
+			},
+			MATERIAL :
+			{
+				BASIC : 0,
+				LAMBER : 1,
+				PHONG : 2
+			}
+		};
+
+
+		var CONST_GEO =
+		{
+			SPHERE :
+			{
+				SEGMENTS :
+				{
+					WIDTH : 32,
+					HEIGHT : 16
+				}
+			},
+			CUBE :
+			{
+				Z_DEPTH : 1
+			}
+		}
+
+		var sceneConfig = {
+			show_axes : true,
+			scene_objects : [],
+			lighting : {},
+			camera : {},
+			data : [
+				{
+					position : 
+					{
+						x : 0,
+						y : 0,
+						z : 0
+					},
+					color : 0x00ff00,
+					size : 10,
+					type : PLOT_TYPE.ITEM.SPHERE,
+					material : PLOT_TYPE.MATERIAL.PHONG,
+					original_item : {}
+				},
+				{
+					position : 
+					{
+						x : 40,
+						y : 40,
+						z : 40
+					},
+					color : 0x0000ff,
+					size : 5,
+					type : PLOT_TYPE.ITEM.SPHERE,
+					material : PLOT_TYPE.MATERIAL.BASIC,
+					original_item : {}
+				},
+				{
+					position : 
+					{
+						x : 0,
+						y : 40,
+						z : 40
+					},
+					color : 0x0000ff,
+					size : 2,
+					type : PLOT_TYPE.ITEM.SPHERE,
+					material : PLOT_TYPE.MATERIAL.LAMBER,
+					original_item : {}
+				}
+			]
+		};
+
+		// custom global variables
+		var mesh;
+
+		init();
+		animate();
+
+		// FUNCTIONS 		
+		function init() 
+		{
+
+			// SCENE
+			scene = new THREE.Scene();
+			// CAMERA
+			var SCREEN_WIDTH = window.innerWidth, SCREEN_HEIGHT = window.innerHeight;
+			var VIEW_ANGLE = 45, ASPECT = SCREEN_WIDTH / SCREEN_HEIGHT, NEAR = 0.1, FAR = 20000;
+			camera = new THREE.PerspectiveCamera( VIEW_ANGLE, ASPECT, NEAR, FAR);
+			scene.add(camera);
+			camera.position.set(0,150,400);
+			camera.lookAt(scene.position);	
+			// RENDERER
+			if ( Detector.webgl )
+				renderer = new THREE.WebGLRenderer( {antialias:true} );
+			else
+				renderer = new THREE.CanvasRenderer(); 
+			renderer.setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
+			container = document.getElementById( 'ThreeJS' );
+			container.appendChild( renderer.domElement );
+			// EVENTS
+			THREEx.WindowResize(renderer, camera);
+			THREEx.FullScreen.bindKey({ charCode : 'm'.charCodeAt(0) });
+			// CONTROLS
+			controls = new THREE.OrbitControls( camera, renderer.domElement );
+			// STATS
+			stats = new Stats();
+			stats.domElement.style.position = 'absolute';
+			stats.domElement.style.bottom = '0px';
+			stats.domElement.style.zIndex = 100;
+			container.appendChild( stats.domElement );
+			// LIGHT
+			var light = new THREE.PointLight(0xffffff);
+			light.position.set(100,250,100);
+			scene.add(light);
+			/*
+			// FLOOR
+			var floorTexture = new THREE.ImageUtils.loadTexture( 'images/checkerboard.jpg' );
+			floorTexture.wrapS = floorTexture.wrapT = THREE.RepeatWrapping; 
+			floorTexture.repeat.set( 10, 10 );
+			var floorMaterial = new THREE.MeshBasicMaterial( { map: floorTexture, side: THREE.DoubleSide } );
+			var floorGeometry = new THREE.PlaneGeometry(1000, 1000, 10, 10);
+			var floor = new THREE.Mesh(floorGeometry, floorMaterial);
+			floor.position.y = -0.5;
+			floor.rotation.x = Math.PI / 2;
+			scene.add(floor);
+			*/
+			// SKYBOX
+			var skyBoxGeometry = new THREE.CubeGeometry( 10000, 10000, 10000 );
+			var skyBoxMaterial = new THREE.MeshBasicMaterial( { color: 0x9999ff, side: THREE.BackSide } );
+			var skyBox = new THREE.Mesh( skyBoxGeometry, skyBoxMaterial );
+			scene.add(skyBox);
+			
+			////////////
+			// CUSTOM //
+			////////////
+
+			var getGeometry = function(item_type, size){
+				var getSphereGeometry = function(radius){
+					return new THREE.SphereGeometry( radius, CONST_GEO.SPHERE.SEGMENTS.WIDTH, CONST_GEO.SPHERE.SEGMENTS.HEIGHT);
+				}
+
+				var getCubeGeometry = function(radius){
+					return new THREE.BoxGeometry(radius, radius, CONST_GEO.SPHERE.Z_DEPTH);
+				}
+
+				if(item_type == PLOT_TYPE.ITEM.SPHERE)
+					return getSphereGeometry(size / 2);
+				else if(item_type == PLOT_TYPE.ITEM.CUBE)
+					return getCubeGeometry(size);
+
+				return null;
+			}
+
+
+			var getMaterial = function(item_material, item_color){
+				var getBasicMaterial = function(properties){
+					return new THREE.MeshBasicMaterial(properties);
+				}
+
+				var getLambertMaterial = function(properties){
+					return new THREE.MeshLambertMaterial(properties);
+				}
+
+				var getPhongMaterial = function(properties) {
+					return new THREE.MeshPhongMaterial(properties);
+				}
+
+				if(item_material == PLOT_TYPE.MATERIAL.BASIC)
+					return getBasicMaterial( { color: item_color } );
+				else if(item_material == PLOT_TYPE.MATERIAL.LAMBER)
+					return getLambertMaterial( { color: item_color } );
+				else if(item_material == PLOT_TYPE.MATERIAL.PHONG)
+					return getPhongMaterial( { color: item_color } );
+
+				return null;
+			}
+			
+			var itemDataIndex = sceneConfig.data.length;
+			while(itemDataIndex--) {
+				var itemData = sceneConfig.data[itemDataIndex];
+
+				var geometry = getGeometry(itemData.type, itemData.size);
+				var material = getMaterial(itemData.material, itemData.color);
+
+				mesh = new THREE.Mesh( geometry, material );
+				mesh.position.set(itemData.position.x, itemData.position.y, itemData.position.z);
+				scene.add(mesh);
+			}
+			
+			//var axes = new THREE.AxisHelper(50);
+			//axes.position = mesh.position;
+			//scene.add(axes);
+			
+			var gridXZ = new THREE.GridHelper(100, 10);
+			gridXZ.setColors( new THREE.Color(0x006600), new THREE.Color(0x006600) );
+			gridXZ.position.set( 100,0,100 );
+			scene.add(gridXZ);
+			
+			var gridXY = new THREE.GridHelper(100, 10);
+			gridXY.position.set( 100,100,0 );
+			gridXY.rotation.x = Math.PI/2;
+			gridXY.setColors( new THREE.Color(0x000066), new THREE.Color(0x000066) );
+			scene.add(gridXY);
+
+			var gridYZ = new THREE.GridHelper(100, 10);
+			gridYZ.position.set( 0,100,100 );
+			gridYZ.rotation.z = Math.PI/2;
+			gridYZ.setColors( new THREE.Color(0x660000), new THREE.Color(0x660000) );
+			scene.add(gridYZ);
+			
+			// direction (normalized), origin, length, color(hex)
+			//var origin = new THREE.Vector3(50,100,50);
+			//var terminus  = new THREE.Vector3(75,75,75);
+			//var direction = new THREE.Vector3().subVectors(terminus, origin).normalize();
+			//var arrow = new THREE.ArrowHelper(direction, origin, 50, 0x884400);
+			//scene.add(arrow);
+			
+			
+			
+		}
+
+		function animate() 
+		{
+		    requestAnimationFrame( animate );
+			render();		
+			update();
+		}
+
+		function update()
+		{
+			if ( keyboard.pressed("z") ) 
+			{	// do something   
+			}
+			
+			controls.update();
+			stats.update();
+		}
+
+		function render() 
+		{
+			renderer.render( scene, camera );
+		}
+
+	</script>
+
+	</body>
+</html>
