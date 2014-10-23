@@ -57,6 +57,14 @@
 			CUBE :
 			{
 				Z_DEPTH : 1
+			},
+			MODE :
+			{
+				OUTLINE : {
+					NO : 0,
+					YES : 1,
+					HOVER : 2
+				}
 			}
 		}
 
@@ -74,6 +82,11 @@
 						z : 0
 					},
 					color : 0x00ff00,
+					outline : {
+						mode : CONST_GEO.MODE.OUTLINE.YES,
+						color : 0xff0000,
+						expand : 1.2
+					},
 					size : 10,
 					type : PLOT_TYPE.ITEM.SPHERE,
 					material : PLOT_TYPE.MATERIAL.PHONG,
@@ -87,6 +100,11 @@
 						z : 40
 					},
 					color : 0x0000ff,
+					outline : {
+						mode : CONST_GEO.MODE.OUTLINE.YES,
+						color : 0xff0000,
+						expand : 1.2
+					},
 					size : 5,
 					type : PLOT_TYPE.ITEM.SPHERE,
 					material : PLOT_TYPE.MATERIAL.BASIC,
@@ -100,6 +118,11 @@
 						z : 40
 					},
 					color : 0x0000ff,
+					outline : {
+						mode : CONST_GEO.MODE.OUTLINE.YES,
+						color : 0xff0000,
+						expand : 1.2
+					},
 					size : 2,
 					type : PLOT_TYPE.ITEM.SPHERE,
 					material : PLOT_TYPE.MATERIAL.LAMBER,
@@ -109,7 +132,6 @@
 		};
 
 		// custom global variables
-		var mesh;
 
 		init();
 		animate();
@@ -220,15 +242,42 @@
 				var geometry = getGeometry(itemData.type, itemData.size);
 				var material = getMaterial(itemData.material, itemData.color);
 
-				mesh = new THREE.Mesh( geometry, material );
+				var mesh = new THREE.Mesh( geometry, material );
 				mesh.position.set(itemData.position.x, itemData.position.y, itemData.position.z);
 				scene.add(mesh);
+
+
+				if(itemData.outline.mode == CONST_GEO.MODE.OUTLINE.YES) {
+					var outlineMaterial = new THREE.MeshBasicMaterial( { color: itemData.outline.color, side: THREE.BackSide } );
+					var outlineMesh = new THREE.Mesh( geometry, outlineMaterial );
+					outlineMesh.position.x = mesh.position.x;
+					outlineMesh.position.y = mesh.position.y;
+					outlineMesh.position.z = mesh.position.z;
+					outlineMesh.scale.multiplyScalar(itemData.outline.expand);
+					scene.add( outlineMesh );
+				}
 			}
+
+			drawGrids();
 			
 			//var axes = new THREE.AxisHelper(50);
 			//axes.position = mesh.position;
 			//scene.add(axes);
 			
+			
+			// direction (normalized), origin, length, color(hex)
+			//var origin = new THREE.Vector3(50,100,50);
+			//var terminus  = new THREE.Vector3(75,75,75);
+			//var direction = new THREE.Vector3().subVectors(terminus, origin).normalize();
+			//var arrow = new THREE.ArrowHelper(direction, origin, 50, 0x884400);
+			//scene.add(arrow);
+			
+			
+			
+		}
+
+		function drawGrids() {
+
 			var gridXZ = new THREE.GridHelper(100, 10);
 			gridXZ.setColors( new THREE.Color(0x006600), new THREE.Color(0x006600) );
 			gridXZ.position.set( 100,0,100 );
@@ -245,16 +294,7 @@
 			gridYZ.rotation.z = Math.PI/2;
 			gridYZ.setColors( new THREE.Color(0x660000), new THREE.Color(0x660000) );
 			scene.add(gridYZ);
-			
-			// direction (normalized), origin, length, color(hex)
-			//var origin = new THREE.Vector3(50,100,50);
-			//var terminus  = new THREE.Vector3(75,75,75);
-			//var direction = new THREE.Vector3().subVectors(terminus, origin).normalize();
-			//var arrow = new THREE.ArrowHelper(direction, origin, 50, 0x884400);
-			//scene.add(arrow);
-			
-			
-			
+
 		}
 
 		function animate() 
