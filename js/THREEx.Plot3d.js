@@ -24,7 +24,8 @@ THREEx.ClusterPlot3d = function(plot_options)
 			ITEM :
 			{
 				SPHERE : 0,
-				CUBE : 1
+				CUBE : 1,
+				BAR : 2
 			},
 			MATERIAL :
 			{
@@ -101,7 +102,7 @@ THREEx.ClusterPlot3d = function(plot_options)
 						expand : 1.2
 					},
 					size : 5,
-					type : PLOT_TYPE.ITEM.CUBE,
+					type : PLOT_TYPE.ITEM.BAR,
 					material : PLOT_TYPE.MATERIAL.BASIC,
 					original_item : {}
 				},
@@ -118,7 +119,7 @@ THREEx.ClusterPlot3d = function(plot_options)
 						color : 0xff0000,
 						expand : 1.2
 					},
-					size : 2,
+					size : 8,
 					type : PLOT_TYPE.ITEM.SPHERE,
 					material : PLOT_TYPE.MATERIAL.LAMBER,
 					original_item : {}
@@ -215,55 +216,63 @@ THREEx.ClusterPlot3d = function(plot_options)
 		this.scene.add(gridYZ);
 	}
 
-	this.getGeometry = function(item_type, size, height){
-			var getSphereGeometry = function(radius){
-				return new THREE.SphereGeometry( radius, CONST_GEO.SPHERE.SEGMENTS.WIDTH, CONST_GEO.SPHERE.SEGMENTS.HEIGHT);
-			}
-			var getCubeGeometry = function(radius){
-				return new THREE.BoxGeometry(radius, radius, radius);
-			}
-
-			if(item_type == PLOT_TYPE.ITEM.SPHERE)
-				return getSphereGeometry(size / 2);
-			else if(item_type == PLOT_TYPE.ITEM.CUBE)
-				return getCubeGeometry(size);
-
-			return null;
+	this.getGeometry = function(item_type, size, position){
+		var getSphereGeometry = function(radius){
+			return new THREE.SphereGeometry( radius, CONST_GEO.SPHERE.SEGMENTS.WIDTH, CONST_GEO.SPHERE.SEGMENTS.HEIGHT);
 		}
+		var getCubeGeometry = function(radius){
+			return new THREE.BoxGeometry(radius, radius, radius);
+		}
+		var getBarGeometry = function(radius, position){
+			return new THREE.BoxGeometry(radius, position.z - radius / 2, radius);
+		}
+
+		if(item_type == PLOT_TYPE.ITEM.SPHERE)
+			return getSphereGeometry(size / 2);
+		else if(item_type == PLOT_TYPE.ITEM.CUBE)
+			return getCubeGeometry(size);
+		else if(item_type == PLOT_TYPE.ITEM.BAR)
+			return getBarGeometry(size, position);
+
+		return null;
+	}
 
 
 	this.getMaterial = function(item_material, item_color){
-			var getBasicMaterial = function(properties){
-				return new THREE.MeshBasicMaterial(properties);
-			}
-
-			var getLambertMaterial = function(properties){
-				return new THREE.MeshLambertMaterial(properties);
-			}
-
-			var getPhongMaterial = function(properties) {
-				return new THREE.MeshPhongMaterial(properties);
-			}
-
-			if(item_material == PLOT_TYPE.MATERIAL.BASIC)
-				return getBasicMaterial( { color: item_color } );
-			else if(item_material == PLOT_TYPE.MATERIAL.LAMBER)
-				return getLambertMaterial( { color: item_color } );
-			else if(item_material == PLOT_TYPE.MATERIAL.PHONG)
-					return getPhongMaterial( { color: item_color } );
-
-			return null;
+		var getBasicMaterial = function(properties){
+			return new THREE.MeshBasicMaterial(properties);
 		}
+
+		var getLambertMaterial = function(properties){
+			return new THREE.MeshLambertMaterial(properties);
+		}
+
+		var getPhongMaterial = function(properties) {
+			return new THREE.MeshPhongMaterial(properties);
+		}
+
+		if(item_material == PLOT_TYPE.MATERIAL.BASIC)
+			return getBasicMaterial( { color: item_color } );
+		else if(item_material == PLOT_TYPE.MATERIAL.LAMBER)
+			return getLambertMaterial( { color: item_color } );
+		else if(item_material == PLOT_TYPE.MATERIAL.PHONG)
+			return getPhongMaterial( { color: item_color } );
+
+		return null;
+	}
 	
 	this.drawData = function() {
 		var itemDataIndex = this.sceneConfig.data.length;
 		while(itemDataIndex--) {
 			var itemData = this.sceneConfig.data[itemDataIndex];
-			var geometry = this.getGeometry(itemData.type, itemData.size);
+			var geometry = this.getGeometry(itemData.type, itemData.size, itemData.position);
 			var material = this.getMaterial(itemData.material, itemData.color);
 			var mesh = new THREE.Mesh( geometry, material );
 
-			mesh.position.set(itemData.position.x, itemData.position.y, itemData.position.z);
+			if(itemData.type == PLOT_TYPE.ITEM.BAR)
+				mesh.position.set(itemData.position.x,( itemData.position.y  - itemData.size / 2)/ 2, itemData.position.z);
+			else
+				mesh.position.set(itemData.position.x, itemData.position.y, itemData.position.z);
 			this.scene.add(mesh);
 
 			if(itemData.outline.mode == CONST_GEO.MODE.OUTLINE.YES) {
