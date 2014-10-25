@@ -182,8 +182,7 @@ THREEx.ClusterPlot3d = function(plot_options)
 		this.render();		
 		this.update();
 	}
-	this.update = function()
-	{
+	this.update = function(){
 		if ( this.keyboard.pressed("z") ) 
 		{	// do something   
 		}	
@@ -192,8 +191,7 @@ THREEx.ClusterPlot3d = function(plot_options)
 			this.stats.update();
 	}
 
-	this.render = function() 
-	{
+	this.render = function() {
 		this.renderer.render( this.scene, this.camera );
 	}
 
@@ -270,7 +268,7 @@ THREEx.ClusterPlot3d = function(plot_options)
 			var mesh = new THREE.Mesh( geometry, material );
 
 			if(itemData.type == PLOT_TYPE.ITEM.BAR)
-				mesh.position.set(itemData.position.x,( itemData.position.y  - itemData.size / 2)/ 2, itemData.position.z);
+				mesh.position.set(itemData.position.x,( itemData.position.y  - itemData.size / 2) / 2, itemData.position.z);
 			else
 				mesh.position.set(itemData.position.x, itemData.position.y, itemData.position.z);
 			this.scene.add(mesh);
