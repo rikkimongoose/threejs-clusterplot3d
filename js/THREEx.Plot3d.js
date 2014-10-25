@@ -268,7 +268,7 @@ THREEx.ClusterPlot3d = function(plot_options)
 			var mesh = new THREE.Mesh( geometry, material );
 
 			if(itemData.type == PLOT_TYPE.ITEM.BAR)
-				mesh.position.set(itemData.position.x,( itemData.position.y  - itemData.size / 2) / 2, itemData.position.z);
+				mesh.position.set(itemData.position.x,( itemData.position.y - itemData.size / 2) / 2, itemData.position.z);
 			else
 				mesh.position.set(itemData.position.x, itemData.position.y, itemData.position.z);
 			this.scene.add(mesh);
@@ -283,6 +283,40 @@ THREEx.ClusterPlot3d = function(plot_options)
 				this.scene.add( outlineMesh );
 			}
 		}
+	}
+
+	this.setParseRules = function(rules) {
+		var default_rules = {
+			x : 0,
+			y : 1,
+			z : 2,
+			color : function() { return 0xFF0000; },
+			glow : function() { return null; },
+			size : 3,
+			type : function() { return PLOT_TYPE.ITEM.SPHERE; }
+		};
+
+		var get_rule_value = function(rule_key) {
+			if(typeof rules[rule_key] != "undefined")
+				return rules[rule_key];
+			var rule_key_const = rule_key + "-const";
+			if(typeof rules[rule_key_const] != "undefined")
+				return rules[rule_key_const];
+			if(typeof default_rules[rule_key] != "undefined")
+				return default_rules[rule_key];
+			return null;
+		}
+
+		this.parse_rules = {};
+
+		for(var rule_key in default_rules) {
+			this.parse_rules[rule_key] = get_rule_value(rule_key);
+		}
+		console.log(this.parse_rules);
+	}
+
+	this.doParse = function(data) {
+		
 	}
 }
 
@@ -303,4 +337,9 @@ THREEx.ClusterPlot3d.prototype.doDrawBackground = function(elem_id)
 }
 THREEx.ClusterPlot3d.prototype.doDrawData = function(){
 	this.drawData();
+}
+
+THREEx.ClusterPlot3d.prototype.doParseData = function(data, data_parse_config){
+	this.setParseRules(data_parse_config);
+	//this.drawData();
 }
