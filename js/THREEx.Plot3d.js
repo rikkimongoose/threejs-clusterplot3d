@@ -286,22 +286,35 @@ THREEx.ClusterPlot3d = function(plot_options)
 	}
 
 	this.setParseRules = function(rules) {
-		var default_rules = {
+		var default_rules_values {
+
 			x : 0,
-			y : 1,
-			z : 2,
+			y : 0,
+			z : 0,
+			color : 0xFF0000,
+			glow : null,
+			size : 1,
+			type : PLOT_TYPE.ITEM.SPHERE
+		};
+		var default_rules = {
+			x : function(item) { return item[0]; },
+			y : function(item) { return item[1]; },
+			z : function(item) { return item[2]; },
 			color : function() { return 0xFF0000; },
 			glow : function() { return null; },
-			size : 3,
+			size : : function(item) { return item[3]; },
 			type : function() { return PLOT_TYPE.ITEM.SPHERE; }
 		};
 
 		var get_rule_value = function(rule_key) {
-			if(typeof rules[rule_key] != "undefined")
-				return rules[rule_key];
+			if(typeof rules[rule_key] != "undefined"){
+				if(typeof rules[rule_key] == "function")
+					return rules[rule_key];
+				return function(item) { return item[rules[rule_key]]; };
+			}
 			var rule_key_const = rule_key + "-const";
 			if(typeof rules[rule_key_const] != "undefined")
-				return rules[rule_key_const];
+				return function() { return rules[rule_key_const] };
 			if(typeof default_rules[rule_key] != "undefined")
 				return default_rules[rule_key];
 			return null;
