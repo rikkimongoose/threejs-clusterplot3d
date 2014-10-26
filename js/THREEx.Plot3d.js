@@ -147,21 +147,23 @@ THREEx.ClusterPlot3d = function(plot_options) {
 		this.renderer.render( this.scene, this.camera );
 	}
 
+	this.options.steps_size = 100;
 	this.options.steps_count = 20;
-	this.options.steps_count_koeff = 10;
+	this.options.steps_step = (this.options.steps_size / this.options.steps_count) * 2;
+	this.options.steps_count_koeff = this.options.steps_step;
 
 	this.grid_options = {
 		xz : {
-			size : 100,
-			step : 10
+			size : this.options.steps_size,
+			step : this.options.steps_step
 		},
 		xy : {
-			size : 100,
-			step : 10
+			size : this.options.steps_size,
+			step : this.options.steps_step
 		},
 		yz : {
-			size : 100,
-			step : 10
+			size : this.options.steps_size,
+			step : this.options.steps_step
 		}
 	};
 
