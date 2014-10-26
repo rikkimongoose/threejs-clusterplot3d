@@ -24,8 +24,8 @@
 		$(function() {
 			var cluster3d = new THREEx.ClusterPlot3d();
 			cluster3d.doDrawBackground("ThreeJS");
+			cluster3d.doParseData([[0,0,0,5], [10,10,10,5], [20, 20, 20, 5]], {});
 			cluster3d.doDrawData();
-			cluster3d.doParseData([[0,0,0,1], [10,10,10,1], [20, 20, 20, 1]], {});
 
 			//draw_axes();
 		});
