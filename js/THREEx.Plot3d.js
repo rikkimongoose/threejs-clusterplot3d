@@ -1,15 +1,27 @@
 
 
 /** @namespace */
-var THREEx	= THREEx 		|| {};
+var THREEx	= THREEx || {};
 
 var ThreeJs_plots = [];
 
-THREEx.ClusterPlot3d = function(plot_options)
-{
+THREEx.ClusterPlot3d = function(plot_options) {
 	this.keyboard = new THREEx.KeyboardState();
 	this.clock = new THREE.Clock();
 
+		var get_rule_value = function(rule_key) {
+			if(typeof rules[rule_key] != "undefined"){
+				if(typeof rules[rule_key] == "function")
+					return rules[rule_key];
+				return function(item) { return item[rules[rule_key]]; };
+			}
+			var rule_key_const = rule_key + "-const";
+			if(typeof rules[rule_key_const] != "undefined")
+				return function() { return rules[rule_key_const] };
+			if(typeof default_rules[rule_key] != "undefined")
+				return default_rules[rule_key];
+			return null;
+		}
 	this.options = plot_options || {};
 	this.options.show_stats = false;
 
@@ -78,11 +90,8 @@ THREEx.ClusterPlot3d = function(plot_options)
 						z : 0
 					},
 					color : 0x00ff00,
-					outline : {
-						mode : CONST_GEO.MODE.OUTLINE.YES,
-						color : 0xff0000,
-						expand : 1.2
-					},
+					outline_color : 0xff0000,
+					outline_expand : 1.2,
 					size : 10,
 					type : PLOT_TYPE.ITEM.CUBE,
 					material : PLOT_TYPE.MATERIAL.PHONG,
@@ -96,11 +105,8 @@ THREEx.ClusterPlot3d = function(plot_options)
 						z : 40
 					},
 					color : 0x0000ff,
-					outline : {
-						mode : CONST_GEO.MODE.OUTLINE.YES,
-						color : 0xff0000,
-						expand : 1.2
-					},
+					outline_color : 0xff0000,
+					outline_expand : 1.2,
 					size : 5,
 					type : PLOT_TYPE.ITEM.BAR,
 					material : PLOT_TYPE.MATERIAL.BASIC,
@@ -114,11 +120,8 @@ THREEx.ClusterPlot3d = function(plot_options)
 						z : 40
 					},
 					color : 0x0000ff,
-					outline : {
-						mode : CONST_GEO.MODE.OUTLINE.YES,
-						color : 0xff0000,
-						expand : 1.2
-					},
+					outline_color : 0xff0000,
+					outline_expand : 1.2,
 					size : 8,
 					type : PLOT_TYPE.ITEM.SPHERE,
 					material : PLOT_TYPE.MATERIAL.LAMBER,
@@ -195,19 +198,34 @@ THREEx.ClusterPlot3d = function(plot_options)
 		this.renderer.render( this.scene, this.camera );
 	}
 
+	this.grid_params = {
+		xz : {
+			size : 100,
+			step : 10
+		},
+		xy : {
+			size : 100,
+			step : 10
+		},
+		yz : {
+			size : 100,
+			step : 10
+		}
+	}
+
 	this.grids = function(){
-		var gridXZ = new THREE.GridHelper(100, 10);
+		var gridXZ = new THREE.GridHelper(this.grid_params.xz.size, this.grid_params.xz.step);
 		gridXZ.setColors( new THREE.Color(0x006600), new THREE.Color(0x006600) );
 		gridXZ.position.set( 100,0,100 );
 		this.scene.add(gridXZ);
 			
-		var gridXY = new THREE.GridHelper(100, 10);
+		var gridXY = new THREE.GridHelper(this.grid_params.xy.size, this.grid_params.xy.step);
 		gridXY.position.set( 100,100,0 );
 		gridXY.rotation.x = Math.PI/2;
 		gridXY.setColors( new THREE.Color(0x000066), new THREE.Color(0x000066) );
 		this.scene.add(gridXY);
 
-		var gridYZ = new THREE.GridHelper(100, 10);
+		var gridYZ = new THREE.GridHelper(this.grid_params.yz.size, this.grid_params.yz.step);
 		gridYZ.position.set( 0,100,100 );
 		gridYZ.rotation.z = Math.PI/2;
 		gridYZ.setColors( new THREE.Color(0x660000), new THREE.Color(0x660000) );
@@ -259,7 +277,7 @@ THREEx.ClusterPlot3d = function(plot_options)
 		return null;
 	}
 	
-	this.drawData = function() {
+	this.draw_plot = function() {
 		var itemDataIndex = this.sceneConfig.data.length;
 		while(itemDataIndex--) {
 			var itemData = this.sceneConfig.data[itemDataIndex];
@@ -273,36 +291,78 @@ THREEx.ClusterPlot3d = function(plot_options)
 				mesh.position.set(itemData.position.x, itemData.position.y, itemData.position.z);
 			this.scene.add(mesh);
 
-			if(itemData.outline.mode == CONST_GEO.MODE.OUTLINE.YES) {
-				var outlineMaterial = new THREE.MeshBasicMaterial( { color: itemData.outline.color, side: THREE.BackSide } );
+			if(itemData.outline_color && itemData.outline_expand) {
+				var outlineMaterial = new THREE.MeshBasicMaterial( { color: itemData.outline_color, side: THREE.BackSide } );
 				var outlineMesh = new THREE.Mesh( geometry, outlineMaterial );
 				outlineMesh.position.x = mesh.position.x;
 				outlineMesh.position.y = mesh.position.y;
 				outlineMesh.position.z = mesh.position.z;
-				outlineMesh.scale.multiplyScalar(itemData.outline.expand);
+				outlineMesh.scale.multiplyScalar(itemData.outline_expand);
 				this.scene.add( outlineMesh );
 			}
 		}
 	}
 
-	this.setParseRules = function(rules) {
-		var default_rules_values {
+	var PARSE_RULES_TYPES = {
+		NUMERIC : 0,
+		COLOR : 1,
+		FIGURE : 2
+	};
 
+	this.parse_rules = {
+			x : {
+				type : PARSE_RULES_TYPES.NUMERIC,
+				func : null
+			},
+			y : {
+				type : PARSE_RULES_TYPES.NUMERIC,
+				func : null
+			},
+			z : {
+				type : PARSE_RULES_TYPES.NUMERIC,
+				func : null
+			},
+			color : {
+				type : PARSE_RULES_TYPES.COLOR,
+				func : null
+			},
+			outline_color : {
+				type : PARSE_RULES_TYPES.COLOR,
+				func : null
+			},
+			outline_expand : {
+				type : PARSE_RULES_TYPES.NUMERIC,
+				func : null
+			},
+			size : {
+				type : PARSE_RULES_TYPES.NUMERIC,
+				func : null
+			},
+			type : {
+				type : PARSE_RULES_TYPES.FIGURE,
+				func : null
+			}
+		};
+
+	this.prepare_parse_rules = function(rules) {
+		var default_rules_values = {
 			x : 0,
 			y : 0,
 			z : 0,
 			color : 0xFF0000,
-			glow : null,
+			outline_color : null,
+			outline_expand : 1.2,
 			size : 1,
 			type : PLOT_TYPE.ITEM.SPHERE
 		};
 		var default_rules = {
-			x : function(item) { return item[0]; },
-			y : function(item) { return item[1]; },
-			z : function(item) { return item[2]; },
-			color : function() { return 0xFF0000; },
-			glow : function() { return null; },
-			size : : function(item) { return item[3]; },
+			x : function(item) { return (typeof item[0] != "undefined") ? item[0] : default_rules_values.x; },
+			y : function(item) { return (typeof item[1] != "undefined") ? item[1] : default_rules_values.y; },
+			z : function(item) { return (typeof item[2] != "undefined") ? item[2] : default_rules_values.z; },
+			color : function() { return default_rules_values.color; },
+			outline_color : function() { return default_rules_values.outline_color; },
+			outline_expand : function() { return default_rules_values.outline_expand; },
+			size : function(item) { return (typeof item[3] != "undefined") ? item[3] : default_rules_values.size; },
 			type : function() { return PLOT_TYPE.ITEM.SPHERE; }
 		};
 
@@ -320,39 +380,66 @@ THREEx.ClusterPlot3d = function(plot_options)
 			return null;
 		}
 
-		this.parse_rules = {};
-
 		for(var rule_key in default_rules) {
-			this.parse_rules[rule_key] = get_rule_value(rule_key);
+			this.parse_rules[rule_key].func = get_rule_value(rule_key);
 		}
-		console.log(this.parse_rules);
 	}
 
-	this.doParse = function(data) {
+	this.background = function(elem_id){
+
+		this.id = elem_id;
+		this.element_id = elem_id;
+		this.container = document.getElementById(elem_id);
+		if(!this.container){
+			console.error("Element with id '%s' is not found.", elem_id);
+			return null;
+		}
 		
+		this.init();
+		this.grids();
+		this.animate();
+
+		return this.scene;
+	}
+
+	this.parse_data = function(data) {
+		this.source_data = data;
+		this.parsed_data = [];
+		var source_data_length = data.length;
+		for(var i = 0; i < source_data_length; i++){
+			var source_data_item = this.source_data[i];
+			var parsed_data_item = {data_item : source_data_item};
+			for(var rule_key in this.parse_rules) {
+				var rule = this.parse_rules[rule_key];
+				parsed_data_item[rule_key] = rule.func(source_data_item);
+			}
+			this.parsed_data.push(parsed_data_item);
+		}
+		console.log(this.parsed_data);
 	}
 }
 
-THREEx.ClusterPlot3d.prototype.doDrawBackground = function(elem_id)
-{
-	this.id = elem_id;
-	this.element_id = elem_id;
-	this.container = document.getElementById(elem_id);
-	if(!this.container){
-		console.error("Element with id '%s' is not found.", elem_id);
-		return null;
-	}
-	
-	this.init();
-	this.grids(this.scene);
-	this.animate();
-	return this.scene;
+THREEx.ClusterPlot3d.prototype.doDrawBackground = function(elem_id) {
+	return this.background(elem_id);
 }
 THREEx.ClusterPlot3d.prototype.doDrawData = function(){
-	this.drawData();
+	this.draw_plot();
 }
 
-THREEx.ClusterPlot3d.prototype.doParseData = function(data, data_parse_config){
-	this.setParseRules(data_parse_config);
+THREEx.ClusterPlot3d.prototype.doParseData = function(data, data_parse_config) {
+	this.prepare_parse_rules(data_parse_config);
+	this.parse_data(data);
 	//this.drawData();
+}
+
+THREEx.getClusterPlotById = function(plot_id) {
+	if(typeof THREEx._plots3d == "undefined")
+		return null;
+	var plot_index = THREEx._plots3d.length;
+	while(--plot_index){
+		var plot_item = THREEx._plots3d[plot_index];
+		if(typeof plot_index.id != "underfined" && plot_index.id == plot_id)
+			return plot_index;
+	}
+	return null;
 }
