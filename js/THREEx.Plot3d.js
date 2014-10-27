@@ -351,7 +351,7 @@ THREEx.ClusterPlot3d = function(plot_options) {
 		var get_rule_value = function(rule_key, is_normalised) {
 			if(typeof rules[rule_key] != "undefined"){
 				if(typeof rules[rule_key] == "function")
-					return rules[rule_key];
+					return { func: rules[rule_key], is_changed : true };
 				return { func: function(item) { return item[rules[rule_key]]; }, is_changed : true };
 			}
 			var rule_key_const = rule_key + "-const";
