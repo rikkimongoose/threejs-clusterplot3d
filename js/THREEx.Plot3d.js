@@ -391,11 +391,11 @@ THREEx.ClusterPlot3d = function(plot_options) {
 				minValue = Math.min(data_item, minValue);
 			}
 
-			var koeff = steps_count / (maxValue - minValue) ;
+			var koeff = ((maxValue != minValue) ? (steps_count / (maxValue - minValue)) : steps_count) * steps_count_koeff;
 			data_key = data_length;
 			while(data_key--) {
 				var data_item = data_to_normalise[data_key][key];
-				data_item = (data_item - minValue) * koeff * steps_count_koeff;
+				data_item = (data_item - minValue) * koeff;
 				data_to_normalise[data_key][key] = data_item;
 			}
 		};
