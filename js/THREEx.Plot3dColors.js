@@ -36,9 +36,9 @@ THREEx.getColorPalette = function(n, palette) {
 		return rgb.r * 0x10000  + rgb.g * 0x100 + rgb.b;
 	}
 
-	var hcltorgb = function(hcl) {
+	var hsltorgb = function(hcl) {
 		var r, g, b;
-		var h = hcl.h, s = hcl.c, l = hcl.l;
+		var h = hsl.h, s = hcl.c, l = hcl.l;
 
 		console.log(hcl);
 
