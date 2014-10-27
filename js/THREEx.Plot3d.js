@@ -1,5 +1,3 @@
-
-
 /** @namespace */
 var THREEx	= THREEx || {};
 
