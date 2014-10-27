@@ -395,7 +395,7 @@ THREEx.ClusterPlot3d = function(plot_options) {
 			data_key = data_length;
 			while(data_key--) {
 				var data_item = data_to_normalise[data_key][key];
-				data_item = (data_item - minValue) * koeff;
+				data_item = ((maxValue != minValue) ? (data_item - minValue) : data_item) * koeff;
 				data_to_normalise[data_key][key] = data_item;
 			}
 		};
