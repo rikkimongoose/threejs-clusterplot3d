@@ -28,6 +28,16 @@ THREEx.ClusterPlot3d = function(plot_options) {
 	this.options.stratch = true;
 	this.options.show_grids = true;
 
+	this.options.color_bg_box = 0xffffff;
+	this.options.color_light = 0xffffff;
+
+	this.options.color_xz = 0x006600;
+	this.options.color_xz_central = 0x00ff00;
+	this.options.color_xy = 0x000066;
+	this.options.color_xy_central = 0x0000ff;
+	this.options.color_yz = 0x660000;
+	this.options.color_yz_central = 0xff0000;
+
 	if(typeof THREEx._plots3d == "undefined")	{
 		THREEx._plots3d = [];
 	}
@@ -118,13 +128,13 @@ THREEx.ClusterPlot3d = function(plot_options) {
 		}
 
 		// LIGHT
-		var light = new THREE.PointLight(0xffffff);
+		var light = new THREE.PointLight(this.options.color_light);
 		light.position.set(100,250,100);
 		this.scene.add(light);
 		
 		// SKYBOX
 		var skyBoxGeometry = new THREE.BoxGeometry( 10000, 10000, 10000 );
-		var skyBoxMaterial = new THREE.MeshBasicMaterial( { color: 0xffffff, side: THREE.BackSide } );
+		var skyBoxMaterial = new THREE.MeshBasicMaterial( { color: this.options.color_bg_box, side: THREE.BackSide } );
 		var skyBox = new THREE.Mesh( skyBoxGeometry, skyBoxMaterial );
 		this.scene.add(skyBox);
 	}
@@ -169,20 +179,20 @@ THREEx.ClusterPlot3d = function(plot_options) {
 
 	this.grids = function(){
 		var gridXZ = new THREE.GridHelper(this.grid_options.xz.size, this.grid_options.xz.step);
-		gridXZ.setColors( new THREE.Color(0x006600), new THREE.Color(0x006600) );
+		gridXZ.setColors( new THREE.Color(this.options.color_xz_central), new THREE.Color(this.options.color_xz) );
 		gridXZ.position.set( 100,0,100 );
 		this.scene.add(gridXZ);
 			
 		var gridXY = new THREE.GridHelper(this.grid_options.xy.size, this.grid_options.xy.step);
 		gridXY.position.set( 100,100,0 );
 		gridXY.rotation.x = Math.PI/2;
-		gridXY.setColors( new THREE.Color(0x000066), new THREE.Color(0x000066) );
+		gridXY.setColors( new THREE.Color(this.options.color_xy_central), new THREE.Color(this.options.color_xy) );
 		this.scene.add(gridXY);
 
 		var gridYZ = new THREE.GridHelper(this.grid_options.yz.size, this.grid_options.yz.step);
 		gridYZ.position.set( 0,100,100 );
 		gridYZ.rotation.z = Math.PI/2;
-		gridYZ.setColors( new THREE.Color(0x660000), new THREE.Color(0x660000) );
+		gridYZ.setColors( new THREE.Color(this.options.color_yz_central), new THREE.Color(this.options.color_yz) );
 		this.scene.add(gridYZ);
 	}
 
