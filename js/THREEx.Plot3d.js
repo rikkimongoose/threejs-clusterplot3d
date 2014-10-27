@@ -124,7 +124,7 @@ THREEx.ClusterPlot3d = function(plot_options) {
 		
 		// SKYBOX
 		var skyBoxGeometry = new THREE.BoxGeometry( 10000, 10000, 10000 );
-		var skyBoxMaterial = new THREE.MeshBasicMaterial( { color: 0x9999ff, side: THREE.BackSide } );
+		var skyBoxMaterial = new THREE.MeshBasicMaterial( { color: 0xffffff, side: THREE.BackSide } );
 		var skyBox = new THREE.Mesh( skyBoxGeometry, skyBoxMaterial );
 		this.scene.add(skyBox);
 	}
