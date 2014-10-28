@@ -28,6 +28,10 @@ THREEx.getColorPalette = function(n, palette) {
 		return { h : h, c : c, l : l};
 	};
 
+	var hsl = function(h, s, l){
+		return { h : h % 365, s : s, l : l };
+	}
+
 	var rgb = function(r, g, b) {
 		return { r : r, g : g, b : b};
 	};
@@ -65,21 +69,21 @@ THREEx.getColorPalette = function(n, palette) {
     	return { r : Math.round(r), g : Math.round(g), b : Math.round(b) };
 	}
 
-	var hcltonum = function(hcl) {
-		return rgbtonum(hcltorgb(hcl));
+	var hsltonum = function(hcl) {
+		return rgbtonum(hsltorgb(hcl));
 	}
 
 	var getGGPlot2Palette = function(n) {
 		var hue_from = 15,
 			hue_to = 375,
 			hue = seq(hue_from, hue_to, n),
-			luminance = 65,
-			chroma = 100;
+			luminance = 0.65,
+			saturation = 0.8;
 
 		var colors_result = [];
 
 		for(var i = 0; i < hue.length; i++)
-			colors_result.push(hcltonum(hcl(hue[i], luminance, chroma)));
+			colors_result.push(hsltonum(hsl(hue[i], saturation, luminance)));
 
 		return colors_result;
 	};
