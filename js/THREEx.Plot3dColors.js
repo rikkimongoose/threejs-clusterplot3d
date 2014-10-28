@@ -2,49 +2,54 @@
 var THREEx	= THREEx || {};
 
 THREEx.ColorPalette = {
-	GGPLOT2 : 1
+	HSLPALETTE : 1
 };
 
 THREEx.getColorPalette = function(n, palette) {
-
 	if(typeof palette == "undefined" || !palette)
 		palette = THREEx.ColorPalette.GGPLOT2;
-	var seq = function(from, to, length){
-		if(!length)
-			return [];
 
-		if(from == to)
-			return from;
+	function isOnePointZero(n) {
+    	return typeof n == "string" && n.indexOf('.') != -1 && parseFloat(n) === 1;
+	}
+
+	function bound01(n, max) {
+    	if ((Math.abs(n - max) < 0.000001)) {
+        	return 1;
+    	}
+
+    	return (n % max) / parseFloat(max);
+	}
+	function seq(from, to, length){
+		if(!length) return [];
+
+		if(from == to || length == 1) return [from];
 
 		var output = [];
 
-		var step = (to - from) / length;
+		var step = (to - from) / (length - 1);
 		for(; from <= to; from += step)
 			output.push(from);
 		return output;
 	};
 
-	var hcl = function(h, c, l) {
-		return { h : h, c : c, l : l};
-	};
-
-	var hsl = function(h, s, l){
-		return { h : h % 365, s : s, l : l };
+	function hsl(h, s, l){
+		return { h : h % 360, s : s % 101, l : l % 101 };
 	}
 
-	var rgb = function(r, g, b) {
+	function rgb(r, g, b) {
 		return { r : r, g : g, b : b};
 	};
 
-	var rgbtonum = function(rgb) {
+	function rgbtonum(rgb) {
 		return rgb.r * 0x10000  + rgb.g * 0x100 + rgb.b;
 	}
 
-	var hsltorgb = function(hcl) {
+	function hsltorgb(hsl) {
 		var r, g, b;
-		var h = hsl.h, s = hcl.c, l = hcl.l;
-
-		console.log(hcl);
+		var h = bound01(hsl.h, 360),
+			s = bound01(hsl.s, 100),
+			l = bound01(hsl.l, 100);
 
 	    if(s == 0){
 	        r = g = b = l; // achromatic
@@ -63,22 +68,20 @@ THREEx.getColorPalette = function(n, palette) {
 	        r = hue2rgb(p, q, h + 1/3);
 	        g = hue2rgb(p, q, h);
 	        b = hue2rgb(p, q, h - 1/3);
-
-	    	console.log({ r : r, g : g, b : b });
 	    }
-    	return { r : Math.round(r), g : Math.round(g), b : Math.round(b) };
+    	return rgb(Math.round(r * 255), Math.round(g * 255), Math.round(b * 255) );
 	}
 
-	var hsltonum = function(hcl) {
+	function hsltonum(hcl) {
 		return rgbtonum(hsltorgb(hcl));
 	}
 
-	var getGGPlot2Palette = function(n) {
-		var hue_from = 15,
-			hue_to = 375,
+	function hslPalette(n) {
+		var hue_from = 0,
+			hue_to = 180,
 			hue = seq(hue_from, hue_to, n),
-			luminance = 0.65,
-			saturation = 0.8;
+			saturation = 100,
+			luminance = 70;
 
 		var colors_result = [];
 
@@ -91,6 +94,6 @@ THREEx.getColorPalette = function(n, palette) {
 	switch(palette)
 	{
 		default:
-			return getGGPlot2Palette(n);
+			return hslPalette(n);
 	}
 };
