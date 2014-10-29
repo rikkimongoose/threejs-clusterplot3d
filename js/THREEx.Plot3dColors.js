@@ -23,7 +23,8 @@ THREEx.getColorsRange = function(n, palette) {
 	function seq(from, to, length){
 		if(!length) return [];
 
-		if(from == to || length == 1) return [from];
+		if(from == to || length == 1)
+			return [from];
 
 		var output = [];
 
@@ -77,6 +78,9 @@ THREEx.getColorsRange = function(n, palette) {
 	}
 
 	function hslPalette(n) {
+		if(n > 180)
+			console.warn('HSL palette allows only 180 colors. With %s categories some of categories will have same color', n)
+
 		var hue_from = 0,
 			hue_to = 180,
 			hue = seq(hue_from, hue_to, n),
@@ -85,7 +89,7 @@ THREEx.getColorsRange = function(n, palette) {
 
 		var colors_result = [];
 
-		for(var i = 0; i < hue.length; i++)
+		for(var i = 0, len = hue.length; i < len; i++)
 			colors_result.push(hsltonum(hsl(hue[i], saturation, luminance)));
 
 		return colors_result;

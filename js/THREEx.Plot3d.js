@@ -384,6 +384,12 @@ THREEx.ClusterPlot3d = function(plot_options) {
 	}
 
 	this.normalise_parsed_data = function(){
+		function map_to_all(items, col_key, val) {
+			var i = items.length;
+			while(i--)
+				items[i][col_key] = val;
+		}
+
 		function normalise_numeric(data_to_normalise, key, steps_count, steps_count_koeff) {
 			var maxValue = Number.NEGATIVE_INFINITY;
 			var minValue = Number.POSITIVE_INFINITY;
@@ -402,7 +408,7 @@ THREEx.ClusterPlot3d = function(plot_options) {
 				data_item = ((maxValue != minValue) ? (data_item - minValue) : data_item) * koeff;
 				data_to_normalise[data_key][key] = data_item;
 			}
-		};
+		}
 
 		function normalise_color(data_to_normalise, column_key, palette) {
 			var categories = [];
@@ -418,15 +424,70 @@ THREEx.ClusterPlot3d = function(plot_options) {
 				var item = data_to_normalise[item_key];
 				item[column_key] = colors[categories.indexOf(item[column_key])];				
 			}
-		};
+		}
+
+		function normalise_range(data, col_key, types) {
+			debugger;
+			var max_type = types.length,
+				is_overflown = false,
+				category_links = {},
+				categories = [],
+				last_one = null;
+
+			for(var data_key in data) {
+				var data_item = data[data_key];
+				var category_title = data_item[col_key];
+				if(typeof category_links[category_title] == "undefined") {
+					var num_category =
+					{
+						name : category_title,
+						items : [data_item],
+						count : 1
+					};
+					category_links[category_title] = num_category;
+					categories.push(num_category);
+					if(!is_overflown && categories.length > max_type){
+						is_overflown = true;
+						console.warn("There're more variants then categories in column '%s'", col_key);
+					}
+				} else {
+					var num_category = category_links[category_title];
+					num_category.items.push(data_item);
+					num_category.count++;
+				}
+			}
+			categories.sort(function(a, b) {
+				if(a.count < b.count)
+					return -1;
+				if(a.count > b.count)
+					return 1;
+				return 0;
+			});
+			for (var i = 0, len = categories.length; i < len; i++) {
+				var category = categories[i];
+				if(i < max_type)
+					last_one = types[i];
+				map_to_all(category.items, col_key, last_one);
+			}
+			return categories;
+		}
 
 		for(var rule_key in this.parse_rules_data_columns) {
 			var data_column_key = this.parse_rules_data_columns[rule_key];
 			var rule = this.parse_rules[data_column_key];
-			if(rule.type == PARSE_RULES_TYPES.NUMERIC){
-				normalise_numeric(this.parsed_data, data_column_key, this.options.steps_count, this.options.steps_count_koeff);
-			} else if (rule.type == PARSE_RULES_TYPES.COLOR){
-				normalise_color(this.parsed_data, data_column_key, this.options.palette);
+			switch(rule.type){
+				case PARSE_RULES_TYPES.NUMERIC:
+					normalise_numeric(this.parsed_data, data_column_key, this.options.steps_count, this.options.steps_count_koeff);
+				break;
+				case PARSE_RULES_TYPES.COLOR:
+					normalise_color(this.parsed_data, data_column_key, this.options.palette);
+				break;
+				case PARSE_RULES_TYPES.FIGURE:
+					normalise_range(this.parsed_data, data_column_key, [THREEx.PLOT_TYPE.ITEM.SPHERE, THREEx.PLOT_TYPE.ITEM.CUBE]);
+				break;
+				case PARSE_RULES_TYPES.MATERIAL:
+					normalise_range(this.parsed_data, data_column_key, [THREEx.PLOT_TYPE.MATERIAL.LAMBER, THREEx.PLOT_TYPE.MATERIAL.PHONG, THREEx.PLOT_TYPE.MATERIAL.BASIC]);
+				break;
 			}
 		}
 	}
@@ -436,8 +497,7 @@ THREEx.ClusterPlot3d = function(plot_options) {
 		this.raw_parsed_data = [];
 		this.parsed_data = [];
 
-		var source_data_length = data.length;
-		for(var i = 0; i < source_data_length; i++){
+		for(var i = 0, len = data.length; i < len; i++){
 			var source_data_item = this.source_data[i];
 			var parsed_data_item = {data_item : source_data_item};
 			for(var rule_key in this.parse_rules) {
