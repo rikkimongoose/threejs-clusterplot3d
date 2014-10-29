@@ -69,6 +69,15 @@ THREEx.ClusterPlot3d = function(plot_options) {
 		color_yz : 0x660000,
 		color_yz_central : 0xff0000,
 
+		camera_x : 400,
+		camera_y : 300,
+		camera_z : 400,
+		camera_angle : 45,
+
+		light_x : 400,
+		light_y : 300,
+		light_z : 400,
+
 		steps_size : 100,
 		steps_count : 20,
 		palette : THREEx.COLOR_PALETTE_TYPE.HSL
@@ -94,10 +103,10 @@ THREEx.ClusterPlot3d = function(plot_options) {
 	
 		// CAMERA
 		var SCREEN_WIDTH = window.innerWidth, SCREEN_HEIGHT = window.innerHeight;
-		var VIEW_ANGLE = 45, ASPECT = SCREEN_WIDTH / SCREEN_HEIGHT, NEAR = 0.1, FAR = 20000;
+		var VIEW_ANGLE = this.options.camera_angle, ASPECT = SCREEN_WIDTH / SCREEN_HEIGHT, NEAR = 0.1, FAR = 20000;
 		this.camera = new THREE.PerspectiveCamera( VIEW_ANGLE, ASPECT, NEAR, FAR);
 		this.scene.add(this.camera);
-		this.camera.position.set(0,150,400);
+		this.camera.position.set(this.options.camera_x, this.options.camera_y, this.options.camera_z);
 		this.camera.lookAt(this.scene.position);	
 		
 		// RENDERER
@@ -129,7 +138,7 @@ THREEx.ClusterPlot3d = function(plot_options) {
 
 		// LIGHT
 		var light = new THREE.PointLight(this.options.color_light);
-		light.position.set(100,250,100);
+		light.position.set(this.options.light_x, this.options.light_y, this.options.light_z);
 		this.scene.add(light);
 		
 		// SKYBOX
