@@ -253,6 +253,16 @@ THREEx.ClusterPlot3d = function(plot_options) {
 		return null;
 	}
 	
+	this.clear_plot = function(){
+		while(this.parsed_data.length) {
+			var item_data = this.parsed_data.pop();
+			if(item_data.mesh)
+				this.scene.remove(item_data.mesh);
+			if(item_data.outlineMesh)
+				this.scene.remove(item_data.outlineMesh);
+		}
+	}
+
 	this.draw_plot = function() {
 		var item_data_index = this.parsed_data.length;
 		while(item_data_index--) {
@@ -265,6 +275,8 @@ THREEx.ClusterPlot3d = function(plot_options) {
 				mesh.position.set(item_data.x,( item_data.y - item_data.size / 2) / 2, item_data.z);
 			else
 				mesh.position.set(item_data.x, item_data.y, item_data.z);
+
+			item_data.mesh = mesh;
 			this.scene.add(mesh);
 
 			if(item_data.outline_color && item_data.outline_expand) {
@@ -274,7 +286,10 @@ THREEx.ClusterPlot3d = function(plot_options) {
 				outlineMesh.position.y = mesh.position.y;
 				outlineMesh.position.z = mesh.position.z;
 				outlineMesh.scale.multiplyScalar(item_data.outline_expand);
+				item_data.outlineMesh = outlineMesh;
 				this.scene.add( outlineMesh );
+			} else {
+				item_data.outlineMesh = null;
 			}
 		}
 	}
@@ -443,8 +458,14 @@ THREEx.ClusterPlot3d.prototype.doDrawBackground = function(elem_id) {
 	this.background(elem_id);
 	return this;
 };
+
 THREEx.ClusterPlot3d.prototype.doDrawData = function(){
 	this.draw_plot();
+	return this;
+};
+
+THREEx.ClusterPlot3d.prototype.doClear = function(){
+	this.clear_plot();
 	return this;
 };
 
