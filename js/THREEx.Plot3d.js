@@ -1,10 +1,16 @@
 /** @namespace */
 var THREEx	= THREEx || {};
 
+/*
+* Store all created 3D plots
+*/
 if(typeof THREEx._plots3d == "undefined") {
 	THREEx._plots3d = [];
 }
 
+/*
+* Types of objects for plot
+*/
 THREEx.PLOT_TYPE =
 	{
 		ITEM :
@@ -21,7 +27,9 @@ THREEx.PLOT_TYPE =
 		}
 	};
 
-
+/*
+* Geometry for plot
+*/
 THREEx.CONST_GEO =
 	{
 		SPHERE :
@@ -278,52 +286,20 @@ THREEx.ClusterPlot3d = function(plot_options) {
 		MATERIAL : 3
 	};
 
+	function makeParseRule(type, is_normalised){
+		return { type : type, func : null, is_normalised : is_normalised}
+	}
+
 	this.parse_rules = {
-			x : {
-				type : PARSE_RULES_TYPES.NUMERIC,
-				func : null,
-				is_normalised : true
-			},
-			y : {
-				type : PARSE_RULES_TYPES.NUMERIC,
-				func : null,
-				is_normalised : true
-			},
-			z : {
-				type : PARSE_RULES_TYPES.NUMERIC,
-				func : null,
-				is_normalised : true
-			},
-			color : {
-				type : PARSE_RULES_TYPES.COLOR,
-				func : null,
-				is_normalised : false
-			},
-			outline_color : {
-				type : PARSE_RULES_TYPES.COLOR,
-				func : null,
-				is_normalised : false
-			},
-			outline_expand : {
-				type : PARSE_RULES_TYPES.NUMERIC,
-				func : null,
-				is_normalised : false
-			},
-			material : {
-				type : PARSE_RULES_TYPES.MATERIAL,
-				func : null,
-				is_normalised : false
-			},
-			size : {
-				type : PARSE_RULES_TYPES.NUMERIC,
-				func : null,
-				is_normalised : false
-			},
-			type : {
-				type : PARSE_RULES_TYPES.FIGURE,
-				func : null,
-				is_normalised : false
-			}
+			x : makeParseRule(PARSE_RULES_TYPES.NUMERIC, true),
+			y : makeParseRule(PARSE_RULES_TYPES.NUMERIC, true),
+			z : makeParseRule(PARSE_RULES_TYPES.NUMERIC, true),
+			color : makeParseRule(PARSE_RULES_TYPES.COLOR, false),
+			outline_color : makeParseRule(PARSE_RULES_TYPES.COLOR, false),
+			outline_expand : makeParseRule(PARSE_RULES_TYPES.NUMERIC, false),
+			material : makeParseRule(PARSE_RULES_TYPES.MATERIAL, false),
+			size : makeParseRule(PARSE_RULES_TYPES.NUMERIC, false),
+			type : makeParseRule(PARSE_RULES_TYPES.FIGURE, false)
 		};
 
 	this.parse_rules_data_columns = [];
