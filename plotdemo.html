@@ -25,7 +25,7 @@
 		$(function() {
 			var cluster3d = new THREEx.ClusterPlot3d();
 			cluster3d.doDrawBackground("ThreeJS");
-			cluster3d.doParseData([[0,0,0,5], [10,10,10,5], [20, 20, 20, 5]], {});
+			cluster3d.doParseData([[0,0,0,5, "color1"], [10,10,10,5, "color2"], [20, 20, 20, 5, "color3"]], {color: 4});
 			cluster3d.doDrawData();
 
 			//draw_axes();

@@ -7,7 +7,7 @@ THREEx.ClusterPlot3d = function(plot_options) {
 	this.keyboard = new THREEx.KeyboardState();
 	this.clock = new THREE.Clock();
 
-	var get_rule_value = function(rule_key) {
+	function get_rule_value(rule_key) {
 		if(typeof rules[rule_key] != "undefined"){
 			if(typeof rules[rule_key] == "function")
 				return rules[rule_key];
@@ -197,13 +197,13 @@ THREEx.ClusterPlot3d = function(plot_options) {
 	}
 
 	this.getGeometry = function(item_type, size, position){
-		var getSphereGeometry = function(radius){
+		function getSphereGeometry(radius){
 			return new THREE.SphereGeometry( radius, CONST_GEO.SPHERE.SEGMENTS.WIDTH, CONST_GEO.SPHERE.SEGMENTS.HEIGHT);
 		}
-		var getCubeGeometry = function(radius){
+		function getCubeGeometry(radius){
 			return new THREE.BoxGeometry(radius, radius, radius);
 		}
-		var getBarGeometry = function(radius, position){
+		function getBarGeometry(radius, position){
 			return new THREE.BoxGeometry(radius, position.z - radius / 2, radius);
 		}
 
@@ -219,15 +219,15 @@ THREEx.ClusterPlot3d = function(plot_options) {
 
 
 	this.getMaterial = function(item_material, item_color){
-		var getBasicMaterial = function(properties){
+		function getBasicMaterial(properties){
 			return new THREE.MeshBasicMaterial(properties);
 		}
 
-		var getLambertMaterial = function(properties){
+		function getLambertMaterial(properties){
 			return new THREE.MeshLambertMaterial(properties);
 		}
 
-		var getPhongMaterial = function(properties) {
+		function getPhongMaterial(properties) {
 			return new THREE.MeshPhongMaterial(properties);
 		}
 
@@ -348,7 +348,7 @@ THREEx.ClusterPlot3d = function(plot_options) {
 			type : function() { return PLOT_TYPE.ITEM.SPHERE; }
 		};
 
-		var get_rule_value = function(rule_key, is_normalised) {
+		function get_rule_value(rule_key, is_normalised) {
 			if(typeof rules[rule_key] != "undefined"){
 				if(typeof rules[rule_key] == "function")
 					return { func: rules[rule_key], is_changed : true };
@@ -371,7 +371,6 @@ THREEx.ClusterPlot3d = function(plot_options) {
 	}
 
 	this.background = function(elem_id){
-
 		this.id = elem_id;
 		this.element_id = elem_id;
 		this.container = document.getElementById(elem_id);
@@ -390,7 +389,7 @@ THREEx.ClusterPlot3d = function(plot_options) {
 	}
 
 	this.normalise_parsed_data = function(){
-		var normalise_numeric = function(data_to_normalise, key, steps_count, steps_count_koeff) {
+		function normalise_numeric(data_to_normalise, key, steps_count, steps_count_koeff) {
 			var maxValue = Number.NEGATIVE_INFINITY;
 			var minValue = Number.POSITIVE_INFINITY;
 			var data_length = data_to_normalise.length;
@@ -418,11 +417,7 @@ THREEx.ClusterPlot3d = function(plot_options) {
 					categories.push(item_value);
 			}
 
-			console.log(categories);
-
 			var colors = THREEx.getColorsRange(categories.length);
-			
-			console.log(colors);
 
 			for(var item_key in data_to_normalise){
 				var item = data_to_normalise[item_key];
@@ -474,7 +469,6 @@ THREEx.ClusterPlot3d.prototype.doDrawData = function(){
 THREEx.ClusterPlot3d.prototype.doParseData = function(data, data_parse_config) {
 	this.prepare_parse_rules(data_parse_config);
 	this.parse_data(data);
-	//this.drawData();
 }
 
 THREEx.getClusterPlotById = function(plot_id) {
