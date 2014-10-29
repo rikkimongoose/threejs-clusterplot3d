@@ -1,6 +1,6 @@
 <html>
     <head>
-    	<title>My first Three.js app</title>
+    	<title>ThreeJS 3D clustering plot example</title>
 	    <style>
 	    	canvas { width: 100%; height: 100% }
 	    </style>
@@ -23,12 +23,12 @@
 	<div id="ThreeJS" style="z-index: 1; position: absolute; left:0px; top:0px; width: 100%; height:100%;"></div>
 	<script>
 		$(function() {
-			var cluster3d = new THREEx.ClusterPlot3d();
-			cluster3d.doDrawBackground("ThreeJS");
-			cluster3d.doParseData([[0,0,0,5, "color1"], [10,10,10,5, "color2"], [20, 20, 20, 5, "color3"]], {color: 4});
-			cluster3d.doDrawData();
-
-			//draw_axes();
+			THREEx.doPlot3d("ThreeJS",
+				[[0,0,0,5, "color1"],
+				[10,10,10,5, "color2"],
+				[20, 20, 20, 5, "color3"]],
+				{color: 4},
+				{});
 		});
 	</script>
 

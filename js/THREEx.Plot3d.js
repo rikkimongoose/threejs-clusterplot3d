@@ -1,6 +1,10 @@
 /** @namespace */
 var THREEx	= THREEx || {};
 
+if(typeof THREEx._plots3d == "undefined") {
+	THREEx._plots3d = [];
+}
+
 THREEx.PLOT_TYPE =
 	{
 		ITEM :
@@ -83,11 +87,6 @@ THREEx.ClusterPlot3d = function(plot_options) {
 	this.options.steps_step = (this.options.steps_size / this.options.steps_count) * 2;
 	this.options.steps_count_koeff = this.options.steps_step;
 
-
-	if(typeof THREEx._plots3d == "undefined")	{
-		THREEx._plots3d = [];
-	}
-
 	THREEx._plots3d.push(this);
 
 	this.init = function(container) {
@@ -144,7 +143,7 @@ THREEx.ClusterPlot3d = function(plot_options) {
     	requestAnimationFrame(this.animate.bind(this));
 		this.render();		
 		this.update();
-	}
+	};
 	this.update = function(){
 		if ( this.keyboard.pressed("z") ) 
 		{	// do something   
@@ -152,11 +151,11 @@ THREEx.ClusterPlot3d = function(plot_options) {
 		this.controls.update();
 		if(this.stats)
 			this.stats.update();
-	}
+	};
 
 	this.render = function() {
 		this.renderer.render( this.scene, this.camera );
-	}
+	};
 
 	this.grid_options = {
 		xz : {
@@ -453,19 +452,22 @@ THREEx.ClusterPlot3d = function(plot_options) {
 		}
 		console.log(this.parsed_data);
 	}
-}
+};
 
 THREEx.ClusterPlot3d.prototype.doDrawBackground = function(elem_id) {
-	return this.background(elem_id);
-}
+	this.background(elem_id);
+	return this;
+};
 THREEx.ClusterPlot3d.prototype.doDrawData = function(){
 	this.draw_plot();
-}
+	return this;
+};
 
 THREEx.ClusterPlot3d.prototype.doParseData = function(data, data_parse_config) {
 	this.prepare_parse_rules(data_parse_config);
 	this.parse_data(data);
-}
+	return this
+};
 
 THREEx.getClusterPlotById = function(plot_id) {
 	if(typeof THREEx._plots3d == "undefined")
@@ -477,4 +479,13 @@ THREEx.getClusterPlotById = function(plot_id) {
 			return plot_index;
 	}
 	return null;
+};
+
+THREEx.doPlot3d = function(container_id, data, data_options, plot_options){
+	var cluster3d = new THREEx.ClusterPlot3d(plot_options)
+		.doDrawBackground(container_id)
+		.doParseData(data, data_options)
+		.doDrawData();
+
+	return cluster3d;
 }
