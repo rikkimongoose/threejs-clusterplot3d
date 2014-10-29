@@ -1,98 +1,94 @@
 /** @namespace */
 var THREEx	= THREEx || {};
 
-var ThreeJs_plots = [];
+THREEx.PLOT_TYPE =
+	{
+		ITEM :
+		{
+			SPHERE : 0,
+			CUBE : 1,
+			BAR : 2
+		},
+		MATERIAL :
+		{
+			BASIC : 0,
+			LAMBER : 1,
+			PHONG : 2
+		}
+	};
+
+
+THREEx.CONST_GEO =
+	{
+		SPHERE :
+		{
+			SEGMENTS :
+			{
+				WIDTH : 32,
+				HEIGHT : 16
+			}
+		},
+		CUBE :
+		{
+			Z_DEPTH : 1
+		},
+		BAR :
+		{
+			Z_DEPTH : 1
+		},
+		MODE :
+		{
+			OUTLINE : {
+				NO : 0,
+				YES : 1,
+				HOVER : 2
+			}
+		}
+	};
 
 THREEx.ClusterPlot3d = function(plot_options) {
 	this.keyboard = new THREEx.KeyboardState();
 	this.clock = new THREE.Clock();
 
-	function get_rule_value(rule_key) {
-		if(typeof rules[rule_key] != "undefined"){
-			if(typeof rules[rule_key] == "function")
-				return rules[rule_key];
-			return function(item) { return item[rules[rule_key]]; };
-		}
-		var rule_key_const = rule_key + "-const";
-		if(typeof rules[rule_key_const] != "undefined")
-			return function() { return rules[rule_key_const] };
-		if(typeof default_rules[rule_key] != "undefined")
-			return default_rules[rule_key];
-		return null;
+	var default_plot_options = {
+		show_stats : false,
+		stratch : true,
+		show_grids : true,
+
+		color_bg_box : 0xffffff,
+		color_light : 0xffffff,
+
+		color_xz : 0x006600,
+		color_xz_central : 0x00ff00,
+		color_xy : 0x000066,
+		color_xy_central : 0x0000ff,
+		color_yz : 0x660000,
+		color_yz_central : 0xff0000,
+
+		steps_size : 100,
+		steps_count : 20,
+		palette : THREEx.COLOR_PALETTE_TYPE.HSL
+	};
+
+	this.options = {};
+
+	if(typeof plot_options != "undefined"){
+		for(var opt_key in default_plot_options)
+			this.options[opt_key] = (typeof plot_options[opt_key] != "undefined") ? plot_options[opt_key] : default_plot_options[opt_key];
+	} else {
+		for(var opt_key in default_plot_options)
+			this.options[opt_key] = default_plot_options[opt_key];
 	}
 
-	this.options = plot_options || {};
-	this.options.show_stats = false;
-	this.options.stratch = true;
-	this.options.show_grids = true;
-
-	this.options.color_bg_box = 0xffffff;
-	this.options.color_light = 0xffffff;
-
-	this.options.color_xz = 0x006600;
-	this.options.color_xz_central = 0x00ff00;
-	this.options.color_xy = 0x000066;
-	this.options.color_xy_central = 0x0000ff;
-	this.options.color_yz = 0x660000;
-	this.options.color_yz_central = 0xff0000;
-
-	this.options.steps_size = 100;
-	this.options.steps_count = 20;
 	this.options.steps_step = (this.options.steps_size / this.options.steps_count) * 2;
 	this.options.steps_count_koeff = this.options.steps_step;
 
-	this.options.palette = THREEx.ColorPalette.HSLPalette;
 
 	if(typeof THREEx._plots3d == "undefined")	{
 		THREEx._plots3d = [];
 	}
 
 	THREEx._plots3d.push(this);
-
-	var PLOT_TYPE =
-		{
-			ITEM :
-			{
-				SPHERE : 0,
-				CUBE : 1,
-				BAR : 2
-			},
-			MATERIAL :
-			{
-				BASIC : 0,
-				LAMBER : 1,
-				PHONG : 2
-			}
-		};
-
-
-	var CONST_GEO =
-		{
-			SPHERE :
-			{
-				SEGMENTS :
-				{
-					WIDTH : 32,
-					HEIGHT : 16
-				}
-			},
-			CUBE :
-			{
-				Z_DEPTH : 1
-			},
-			BAR :
-			{
-				Z_DEPTH : 1
-			},
-			MODE :
-			{
-				OUTLINE : {
-					NO : 0,
-					YES : 1,
-					HOVER : 2
-				}
-			}
-		};
 
 	this.init = function(container) {
 		this.scene = new THREE.Scene();
@@ -198,7 +194,7 @@ THREEx.ClusterPlot3d = function(plot_options) {
 
 	this.getGeometry = function(item_type, size, position){
 		function getSphereGeometry(radius){
-			return new THREE.SphereGeometry( radius, CONST_GEO.SPHERE.SEGMENTS.WIDTH, CONST_GEO.SPHERE.SEGMENTS.HEIGHT);
+			return new THREE.SphereGeometry( radius, THREEx.CONST_GEO.SPHERE.SEGMENTS.WIDTH, THREEx.CONST_GEO.SPHERE.SEGMENTS.HEIGHT);
 		}
 		function getCubeGeometry(radius){
 			return new THREE.BoxGeometry(radius, radius, radius);
@@ -207,11 +203,11 @@ THREEx.ClusterPlot3d = function(plot_options) {
 			return new THREE.BoxGeometry(radius, position.z - radius / 2, radius);
 		}
 
-		if(item_type == PLOT_TYPE.ITEM.SPHERE)
+		if(item_type == THREEx.PLOT_TYPE.ITEM.SPHERE)
 			return getSphereGeometry(size);
-		else if(item_type == PLOT_TYPE.ITEM.CUBE)
+		else if(item_type == THREEx.PLOT_TYPE.ITEM.CUBE)
 			return getCubeGeometry(size * 2);
-		else if(item_type == PLOT_TYPE.ITEM.BAR)
+		else if(item_type == THREEx.PLOT_TYPE.ITEM.BAR)
 			return getBarGeometry(size, position);
 
 		return null;
@@ -231,11 +227,11 @@ THREEx.ClusterPlot3d = function(plot_options) {
 			return new THREE.MeshPhongMaterial(properties);
 		}
 
-		if(item_material == PLOT_TYPE.MATERIAL.BASIC)
+		if(item_material == THREEx.PLOT_TYPE.MATERIAL.BASIC)
 			return getBasicMaterial( { color: item_color } );
-		else if(item_material == PLOT_TYPE.MATERIAL.LAMBER)
+		else if(item_material == THREEx.PLOT_TYPE.MATERIAL.LAMBER)
 			return getLambertMaterial( { color: item_color } );
-		else if(item_material == PLOT_TYPE.MATERIAL.PHONG)
+		else if(item_material == THREEx.PLOT_TYPE.MATERIAL.PHONG)
 			return getPhongMaterial( { color: item_color } );
 
 		return null;
@@ -249,7 +245,7 @@ THREEx.ClusterPlot3d = function(plot_options) {
 			var material = this.getMaterial(item_data.material, item_data.color);
 			var mesh = new THREE.Mesh( geometry, material );
 
-			if(item_data.type == PLOT_TYPE.ITEM.BAR)
+			if(item_data.type == THREEx.PLOT_TYPE.ITEM.BAR)
 				mesh.position.set(item_data.x,( item_data.y - item_data.size / 2) / 2, item_data.z);
 			else
 				mesh.position.set(item_data.x, item_data.y, item_data.z);
@@ -332,9 +328,9 @@ THREEx.ClusterPlot3d = function(plot_options) {
 			color : 0xFF0000,
 			outline_color : null,
 			outline_expand : 1.2,
-			material : PLOT_TYPE.MATERIAL.LAMBER,
+			material : THREEx.PLOT_TYPE.MATERIAL.LAMBER,
 			size : 1,
-			type : PLOT_TYPE.ITEM.SPHERE
+			type : THREEx.PLOT_TYPE.ITEM.SPHERE
 		};
 		var default_rules = {
 			x : function(item) { return (typeof item[0] != "undefined") ? item[0] : default_rules_values.x; },
@@ -345,7 +341,7 @@ THREEx.ClusterPlot3d = function(plot_options) {
 			outline_expand : function() { return default_rules_values.outline_expand; },
 			material : function() { return default_rules_values.material; },
 			size : function(item) { return (typeof item[3] != "undefined") ? item[3] : default_rules_values.size; },
-			type : function() { return PLOT_TYPE.ITEM.SPHERE; }
+			type : function() { return THREEx.PLOT_TYPE.ITEM.SPHERE; }
 		};
 
 		function get_rule_value(rule_key, is_normalised) {

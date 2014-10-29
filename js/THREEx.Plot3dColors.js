@@ -1,13 +1,13 @@
 /** @namespace */
 var THREEx	= THREEx || {};
 
-THREEx.ColorPalette = {
-	HSLPALETTE : 1
+THREEx.COLOR_PALETTE_TYPE = {
+	HSL : 1
 };
 
 THREEx.getColorsRange = function(n, palette) {
 	if(typeof palette == "undefined" || !palette)
-		palette = THREEx.ColorPalette.HSLPALETTE;
+		palette = THREEx.COLOR_PALETTE_TYPE.HSL;
 
 	function isOnePointZero(n) {
     	return typeof n == "string" && n.indexOf('.') != -1 && parseFloat(n) === 1;
