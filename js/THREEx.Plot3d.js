@@ -36,6 +36,13 @@ THREEx.ClusterPlot3d = function(plot_options) {
 	this.options.color_yz = 0x660000;
 	this.options.color_yz_central = 0xff0000;
 
+	this.options.steps_size = 100;
+	this.options.steps_count = 20;
+	this.options.steps_step = (this.options.steps_size / this.options.steps_count) * 2;
+	this.options.steps_count_koeff = this.options.steps_step;
+
+	this.options.palette = THREEx.ColorPalette.HSLPalette;
+
 	if(typeof THREEx._plots3d == "undefined")	{
 		THREEx._plots3d = [];
 	}
@@ -154,11 +161,6 @@ THREEx.ClusterPlot3d = function(plot_options) {
 	this.render = function() {
 		this.renderer.render( this.scene, this.camera );
 	}
-
-	this.options.steps_size = 100;
-	this.options.steps_count = 20;
-	this.options.steps_step = (this.options.steps_size / this.options.steps_count) * 2;
-	this.options.steps_count_koeff = this.options.steps_step;
 
 	this.grid_options = {
 		xz : {
@@ -407,8 +409,25 @@ THREEx.ClusterPlot3d = function(plot_options) {
 				data_to_normalise[data_key][key] = data_item;
 			}
 		};
-		var normalise_color = function(data_to_normalise, key) {
-			/* TODO :  palettes like R */
+
+		function normalise_color(data_to_normalise, column_key, palette) {
+			var categories = [];
+			for(var item_key in data_to_normalise){
+				var item_value = data_to_normalise[item_key][column_key];
+				if(categories.indexOf(item_value) < 0)
+					categories.push(item_value);
+			}
+
+			console.log(categories);
+
+			var colors = THREEx.getColorsRange(categories.length);
+			
+			console.log(colors);
+
+			for(var item_key in data_to_normalise){
+				var item = data_to_normalise[item_key];
+				item[column_key] = colors[categories.indexOf(item[column_key])];				
+			}
 		};
 
 		for(var rule_key in this.parse_rules_data_columns) {
@@ -417,7 +436,7 @@ THREEx.ClusterPlot3d = function(plot_options) {
 			if(rule.type == PARSE_RULES_TYPES.NUMERIC){
 				normalise_numeric(this.parsed_data, data_column_key, this.options.steps_count, this.options.steps_count_koeff);
 			} else if (rule.type == PARSE_RULES_TYPES.COLOR){
-				normalise_color(this.parsed_data, data_column_key);
+				normalise_color(this.parsed_data, data_column_key, this.options.palette);
 			}
 		}
 	}

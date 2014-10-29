@@ -5,9 +5,9 @@ THREEx.ColorPalette = {
 	HSLPALETTE : 1
 };
 
-THREEx.getColorPalette = function(n, palette) {
+THREEx.getColorsRange = function(n, palette) {
 	if(typeof palette == "undefined" || !palette)
-		palette = THREEx.ColorPalette.GGPLOT2;
+		palette = THREEx.ColorPalette.HSLPALETTE;
 
 	function isOnePointZero(n) {
     	return typeof n == "string" && n.indexOf('.') != -1 && parseFloat(n) === 1;
