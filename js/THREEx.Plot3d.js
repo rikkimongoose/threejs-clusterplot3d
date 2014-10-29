@@ -291,7 +291,11 @@ THREEx.ClusterPlot3d = function(plot_options) {
 			} else {
 				item_data.outlineMesh = null;
 			}
+
+			this.execEvent("onItemLoad", { item : item_data });
 		}
+
+		this.execEvent("onItemsLoaded", { items : this.parsed_data });
 	}
 
 	var PARSE_RULES_TYPES = {
@@ -366,6 +370,7 @@ THREEx.ClusterPlot3d = function(plot_options) {
 	}
 
 	this.background = function(elem_id){
+		this.execEvent("onBeforeLoad", { items : this.parsed_data });
 		this.id = elem_id;
 		this.element_id = elem_id;
 		this.container = document.getElementById(elem_id);
@@ -427,7 +432,6 @@ THREEx.ClusterPlot3d = function(plot_options) {
 		}
 
 		function normalise_range(data, col_key, types) {
-			debugger;
 			var max_type = types.length,
 				is_overflown = false,
 				category_links = {},
@@ -510,8 +514,13 @@ THREEx.ClusterPlot3d = function(plot_options) {
 		if(this.options.stratch){
 			this.normalise_parsed_data(this.parsed_data);
 		}
-		console.log(this.parsed_data);
 	}
+
+	this.onItemLoad = [];
+	this.onItemsLoaded = [];
+	this.onBeforeLoad = [];
+	this.onHover = [];
+	this.onHoverOut = [];
 };
 
 THREEx.ClusterPlot3d.prototype.doDrawBackground = function(elem_id) {
@@ -535,6 +544,29 @@ THREEx.ClusterPlot3d.prototype.doParseData = function(data, data_parse_config) {
 	return this
 };
 
+THREEx.ClusterPlot3d.prototype.execEvent = function(event_title, e){
+	var i = this[event_title].length;
+	while(i--){
+		var func = this[event_title][i]
+		if(typeof func == "function")
+			func(this, e);
+	}
+	return this;
+};
+
+THREEx.ClusterPlot3d.prototype.addEvent = function(event_title, func){
+	if(typeof func != "function")
+		return this;
+
+	if(typeof this[event_title] == "undefined"){
+		console.error("Plot 3D doesn't support event '%s'.", event_title);
+		return this;
+	}
+
+	this[event_title].push(func);
+	return this;
+};
+
 THREEx.getClusterPlotById = function(plot_id) {
 	if(typeof THREEx._plots3d == "undefined")
 		return null;
@@ -547,8 +579,13 @@ THREEx.getClusterPlotById = function(plot_id) {
 	return null;
 };
 
-THREEx.doPlot3d = function(container_id, data, data_options, plot_options){
+THREEx.doPlot3d = function(container_id, data, data_options, plot_options, on_item_load, on_items_load, on_before_load, on_hover, on_hover_out){
 	var cluster3d = new THREEx.ClusterPlot3d(plot_options)
+		.addEvent("onItemLoad", on_item_load)
+		.addEvent("onItemsLoaded", on_items_load)
+		.addEvent("onBeforeLoad", on_before_load)
+		.addEvent("onHover", on_hover)
+		.addEvent("onHoverOut", on_hover_out)
 		.doDrawBackground(container_id)
 		.doParseData(data, data_options)
 		.doDrawData();
