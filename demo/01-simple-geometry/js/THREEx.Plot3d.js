@@ -60,8 +60,9 @@ THREEx.CONST_GEO =
 
 THREEx.ClusterPlot3d = function(plot_options) {
 	this.keyboard = new THREEx.KeyboardState();
-	this.clock = new THREE.Clock();
-
+	this.clock = new THREE.Clock
+	this.projector = new THREE.Projector();
+	
 	var default_plot_options = {
 		show_stats : false,
 		stratch : true,
@@ -88,7 +89,11 @@ THREEx.ClusterPlot3d = function(plot_options) {
 
 		steps_size : 100,
 		steps_count : 20,
-		palette : THREEx.COLOR_PALETTE_TYPE.HSL
+		palette : THREEx.COLOR_PALETTE_TYPE.HSL,
+
+		show_hint : true,
+		hint_color : 0xFFFF00,
+		hint_color_border : 0x000000
 	};
 
 	this.options = {};
@@ -104,14 +109,38 @@ THREEx.ClusterPlot3d = function(plot_options) {
 	this.options.steps_step = (this.options.steps_size / this.options.steps_count) * 2;
 	this.options.steps_count_koeff = this.options.steps_step;
 
-	THREEx._plots3d.push(this);
+	this.intersecred = null;
+	this.hint_sprite = null;
+	this.mouse = null;
+    
 
-	this.init = function(container) {
+	THREEx._plots3d.push(this);
+	
+	this.onDocumentMouseMove = function( event ) 
+	{
+			// the following line would stop any other event handler from firing
+			// (such as the mouse's TrackballControls)
+			// event.preventDefault();
+
+			// update sprite position
+			if(this.show_hint && this.hint_sprite) {
+				this.hint_sprite.position.set( event.clientX, event.clientY - 20, 0 );
+			}
+			
+			// update the mouse variable
+			this.mouse = {
+				x : ( event.clientX / this.renderer.domElement.clientWidth )  * 2 - 1,
+				y : ( event.clientY / this.renderer.domElement.clientHeight ) * 2 + 1
+			};
+	}
+
+	this.init = function() {
 		this.scene = new THREE.Scene();
 	
+	
 		// CAMERA
-		var SCREEN_WIDTH = window.innerWidth, SCREEN_HEIGHT = window.innerHeight;
-		var VIEW_ANGLE = this.options.camera_angle, ASPECT = SCREEN_WIDTH / SCREEN_HEIGHT, NEAR = 0.1, FAR = 20000;
+		var screen_width = this.container.clientWidth, screen_height = this.container.clientHeight;
+		var VIEW_ANGLE = this.options.camera_angle, ASPECT = screen_width / screen_height, NEAR = 0.1, FAR = 20000;
 		this.camera = new THREE.PerspectiveCamera( VIEW_ANGLE, ASPECT, NEAR, FAR);
 		this.scene.add(this.camera);
 		this.camera.position.set(this.options.camera_x, this.options.camera_y, this.options.camera_z);
@@ -122,9 +151,17 @@ THREEx.ClusterPlot3d = function(plot_options) {
 			this.renderer = new THREE.WebGLRenderer( {antialias:true} );
 		else
 			this.renderer = new THREE.CanvasRenderer(); 
-		this.renderer.setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
+		this.renderer.setSize(screen_width, screen_height);
 
 		this.container.appendChild( this.renderer.domElement );
+
+		this.container.addEventListener( 'mousemove', this.onDocumentMouseMove.bind(this), false );
+		
+		this.canvas = document.createElement('canvas');
+		this.context = this.canvas.getContext('2d');
+		this.context.font = "Bold 20px Arial";
+		this.context.fillStyle = "rgba(0,0,0,0.95)";
+	    this.context.fillText('Hello, world!', 0, 20);
 
 		// EVENTS
 		THREEx.WindowResize(this.renderer, this.camera);
@@ -164,7 +201,62 @@ THREEx.ClusterPlot3d = function(plot_options) {
 	this.update = function(){
 		if ( this.keyboard.pressed("z") ) 
 		{	// do something   
-		}	
+		}
+		
+		// create a Ray with origin at the mouse position
+		//   and direction into the scene (camera direction)
+		/*(this.mouse) {
+			var vector = new THREE.Vector3( this.mouse.x, this.mouse.y, 1 );
+			this.projector.unprojectVector( vector, this.camera );
+			var ray = new THREE.Raycaster( this.camera.position, vector.sub( this.camera.position ).normalize() );
+
+			// create an array containing all objects in the scene with which the ray intersects
+			var intersects = ray.intersectObjects( this.scene.children );
+
+			// INTERSECTED = the object in the scene currently closest to the camera 
+			//		and intersected by the Ray projected from the mouse position 	
+				
+			// if there is one (or more) intersections
+			if ( intersects.length)
+			{
+				// if the closest object intersected is not the currently stored intersection object
+				if ( intersects[ 0 ].object != this.intersected ) 
+				{
+					    // restore previous intersection object (if it exists) to its original color
+						if ( this.intersected ) 
+							this.intersected.material.color.setHex( this.intersected.currentHex );
+						// store reference to closest object as current intersection object
+						this.intersected = intersects[ 0 ].object;
+						
+						// update text, if it has a "name" field.
+						if ( intersects[ 0 ].object.name )
+						{
+						    this.context.clearRect(0,0,640,480);
+							var message = intersects[ 0 ].object;
+							var metrics = this.context.measureText(message);
+							var width = this.metrics.width;
+							this.context.fillStyle = "rgba(0,0,0,0.95)"; // black border
+							this.context.fillRect( 0,0, width+8,20+8);
+							this.context.fillStyle = "rgba(255,255,255,0.95)"; // white filler
+							this.context.fillRect( 2,2, width+4,20+4 );
+							this.context.fillStyle = "rgba(0,0,0,1)"; // text color
+							this.context.fillText( message, 4,20 );
+						}
+						else
+						{
+							this.context.clearRect(0,0,300,300);
+						}
+					}
+				} 
+				else // there are no intersections
+				
+					// restore previous intersection object (if it exists) to its original color
+					// remove previous intersection object reference
+					//     by setting current intersection object to "nothing"
+					this.intersected = null;
+					this.context.clearRect(0,0,300,300);
+				}
+		}*/
 		this.controls.update();
 		if(this.stats)
 			this.stats.update();
@@ -299,10 +391,11 @@ THREEx.ClusterPlot3d = function(plot_options) {
 	}
 
 	var PARSE_RULES_TYPES = {
-		NUMERIC : 0,
-		COLOR : 1,
-		FIGURE : 2,
-		MATERIAL : 3
+		CONST : 0,
+		NUMERIC : 1,
+		COLOR : 2,
+		FIGURE : 3,
+		MATERIAL : 4
 	};
 
 	function makeParseRule(type, is_normalised){
@@ -313,6 +406,7 @@ THREEx.ClusterPlot3d = function(plot_options) {
 			x : makeParseRule(PARSE_RULES_TYPES.NUMERIC, true),
 			y : makeParseRule(PARSE_RULES_TYPES.NUMERIC, true),
 			z : makeParseRule(PARSE_RULES_TYPES.NUMERIC, true),
+			title : makeParseRule(PARSE_RULES_TYPES.CONST, false),
 			color : makeParseRule(PARSE_RULES_TYPES.COLOR, false),
 			outline_color : makeParseRule(PARSE_RULES_TYPES.COLOR, false),
 			outline_expand : makeParseRule(PARSE_RULES_TYPES.NUMERIC, false),
@@ -325,6 +419,7 @@ THREEx.ClusterPlot3d = function(plot_options) {
 
 	this.prepare_parse_rules = function(rules) {
 		var default_rules_values = {
+			title : null,
 			x : 0,
 			y : 0,
 			z : 0,
@@ -335,7 +430,9 @@ THREEx.ClusterPlot3d = function(plot_options) {
 			size : 1,
 			type : THREEx.PLOT_TYPE.ITEM.SPHERE
 		};
+
 		var default_rules = {
+			title : function() { return default_rules_values.title; },
 			x : function(item) { return (typeof item[0] != "undefined") ? item[0] : default_rules_values.x; },
 			y : function(item) { return (typeof item[1] != "undefined") ? item[1] : default_rules_values.y; },
 			z : function(item) { return (typeof item[2] != "undefined") ? item[2] : default_rules_values.z; },
@@ -491,6 +588,10 @@ THREEx.ClusterPlot3d = function(plot_options) {
 				break;
 				case PARSE_RULES_TYPES.MATERIAL:
 					normalise_range(this.parsed_data, data_column_key, [THREEx.PLOT_TYPE.MATERIAL.LAMBER, THREEx.PLOT_TYPE.MATERIAL.PHONG, THREEx.PLOT_TYPE.MATERIAL.BASIC]);
+				break;
+				case PARSE_RULES_TYPES.CONST:
+				default:
+					/* Const fields are never normalised */
 				break;
 			}
 		}
