@@ -220,11 +220,7 @@ THREEx.ClusterPlot3d = function(plot_options) {
 			if ( intersects.length)
 			{
 				// if the closest object intersected is not the currently stored intersection object
-				if ( intersects[ 0 ].object != this.intersected ) 
-				{
-					    // restore previous intersection object (if it exists) to its original color
-						if ( this.intersected ) 
-							this.intersected.material.color.setHex( this.intersected.currentHex );
+				if ( intersects[ 0 ].object != this.intersected ) {
 						// store reference to closest object as current intersection object
 						this.intersected = intersects[ 0 ].object;
 						
