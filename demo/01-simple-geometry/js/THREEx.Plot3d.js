@@ -132,7 +132,7 @@ THREEx.ClusterPlot3d = function(plot_options) {
 				x : ( event.clientX / this.renderer.domElement.clientWidth )  * 2 - 1,
 				y : ( event.clientY / this.renderer.domElement.clientHeight ) * 2 + 1
 			};
-	}
+	};
 
 	this.init = function() {
 		this.scene = new THREE.Scene();
@@ -692,4 +692,4 @@ THREEx.doPlot3d = function(container_id, data, data_options, plot_options, on_it
 		.doDrawData();
 
 	return cluster3d;
-}
+};
