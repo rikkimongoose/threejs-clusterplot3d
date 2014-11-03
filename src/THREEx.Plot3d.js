@@ -195,68 +195,50 @@ THREEx.ClusterPlot3d = function(plot_options) {
 
 	this.animate = function() {
     	requestAnimationFrame(this.animate.bind(this));
-		this.render();		
+		this.render();
 		this.update();
+		//this.
 	};
+	var this.intersected = null;
 	this.update = function(){
 		if ( this.keyboard.pressed("z") ) 
 		{	// do something   
 		}
-		
-		// create a Ray with origin at the mouse position
-		//   and direction into the scene (camera direction)
-		/*(this.mouse) {
-			var vector = new THREE.Vector3( this.mouse.x, this.mouse.y, 1 );
-			this.projector.unprojectVector( vector, this.camera );
-			var ray = new THREE.Raycaster( this.camera.position, vector.sub( this.camera.position ).normalize() );
+		if(this.mouse) {
+			// create a Ray with origin at the mouse position
+			//   and direction into the scene (camera direction)
+				var vector = new THREE.Vector3( this.mouse.x, this.mouse.y, 1 );
+				this.projector.unprojectVector( vector, this.camera );
+				var ray = new THREE.Raycaster( this.camera.position, vector.sub( this.camera.position ).normalize() );
 
-			// create an array containing all objects in the scene with which the ray intersects
-			var intersects = ray.intersectObjects( this.scene.children );
 
-			// INTERSECTED = the object in the scene currently closest to the camera 
-			//		and intersected by the Ray projected from the mouse position 	
+				// create an array containing all objects in the scene with which the ray intersects
+				var intersects = ray.intersectObjects( this.scene.children );
+
+				// this.intersected = the object in the scene currently closest to the camera 
+				//		and this.intersected by the Ray projected from the mouse position 	
 				
-			// if there is one (or more) intersections
-			if ( intersects.length)
-			{
-				// if the closest object intersected is not the currently stored intersection object
-				if ( intersects[ 0 ].object != this.intersected ) 
-				{
-					    // restore previous intersection object (if it exists) to its original color
-						if ( this.intersected ) 
-							this.intersected.material.color.setHex( this.intersected.currentHex );
-						// store reference to closest object as current intersection object
-						this.intersected = intersects[ 0 ].object;
-						
-						// update text, if it has a "name" field.
-						if ( intersects[ 0 ].object.name )
+				// if there is one (or more) intersections
+				if ( intersects.length > 0 )
+				{		// if the closest object this.intersected is not the currently stored intersection object
+
+					// if there is one (or more) intersections
+						// if the closest object this.intersected is not the currently stored intersection object
+						if ( intersects[ 0 ].object != this.intersected ) 
 						{
-						    this.context.clearRect(0,0,640,480);
-							var message = intersects[ 0 ].object;
-							var metrics = this.context.measureText(message);
-							var width = this.metrics.width;
-							this.context.fillStyle = "rgba(0,0,0,0.95)"; // black border
-							this.context.fillRect( 0,0, width+8,20+8);
-							this.context.fillStyle = "rgba(255,255,255,0.95)"; // white filler
-							this.context.fillRect( 2,2, width+4,20+4 );
-							this.context.fillStyle = "rgba(0,0,0,1)"; // text color
-							this.context.fillText( message, 4,20 );
-						}
-						else
-						{
-							this.context.clearRect(0,0,300,300);
-						}
+							// store reference to closest object as current intersection object
+							this.intersected = intersects[ 0 ].object;
+							
+					} 
+					else // there are no intersections
+					{
+						// restore previous intersection object (if it exists) to its original color
+						// remove previous intersection object reference
+						//     by setting current intersection object to "nothing"
+						this.intersected = null;
 					}
-				} 
-				else // there are no intersections
-				
-					// restore previous intersection object (if it exists) to its original color
-					// remove previous intersection object reference
-					//     by setting current intersection object to "nothing"
-					this.intersected = null;
-					this.context.clearRect(0,0,300,300);
 				}
-		}*/
+		}
 		this.controls.update();
 		if(this.stats)
 			this.stats.update();
