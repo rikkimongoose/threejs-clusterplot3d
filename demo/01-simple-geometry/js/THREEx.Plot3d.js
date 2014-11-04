@@ -92,6 +92,7 @@ THREEx.ClusterPlot3d = function(plot_options) {
 		palette : THREEx.COLOR_PALETTE_TYPE.HSL,
 
 		show_skybox : false,
+		highlight_selected : true,
 		show_hint : true,
 		selected_item_color : 0xFFFFFF,
 		hint_color : 0xFFFF00,
@@ -137,9 +138,22 @@ THREEx.ClusterPlot3d = function(plot_options) {
 	};
 
 	this.init = function() {
+		/*function load_sprite_alignment() {
+			THREE.SpriteAlignment = {};
+			THREE.SpriteAlignment.topLeft = new THREE.Vector2( 1, -1 );
+			THREE.SpriteAlignment.topCenter = new THREE.Vector2( 0, -1 );
+			THREE.SpriteAlignment.topRight = new THREE.Vector2( -1, -1 );
+			THREE.SpriteAlignment.centerLeft = new THREE.Vector2( 1, 0 );
+			THREE.SpriteAlignment.center = new THREE.Vector2( 0, 0 );
+			THREE.SpriteAlignment.centerRight = new THREE.Vector2( -1, 0 );
+			THREE.SpriteAlignment.bottomLeft = new THREE.Vector2( 1, 1 );
+			THREE.SpriteAlignment.bottomCenter = new THREE.Vector2( 0, 1 );
+			THREE.SpriteAlignment.bottomRight = new THREE.Vector2( -1, 1 );
+		}
+		if(typeof THREE.SpriteAlignment == "undefined"){
+			load_sprite_alignment();
+		}*/
 		this.scene = new THREE.Scene();
-	
-	
 		// CAMERA
 		var screen_width = this.container.clientWidth, screen_height = this.container.clientHeight;
 		var VIEW_ANGLE = this.options.camera_angle, ASPECT = screen_width / screen_height, NEAR = 0.1, FAR = 20000;
@@ -159,12 +173,6 @@ THREEx.ClusterPlot3d = function(plot_options) {
 
 		this.container.addEventListener( 'mousemove', this.onDocumentMouseMove.bind(this), false );
 		
-		this.canvas = document.createElement('canvas');
-		this.context = this.canvas.getContext('2d');
-		this.context.font = "Bold 20px Arial";
-		this.context.fillStyle = "rgba(0,0,0,0.95)";
-	    this.context.fillText('Hello, world!', 0, 20);
-
 		// EVENTS
 		THREEx.WindowResize(this.renderer, this.camera);
 		THREEx.FullScreen.bindKey({ charCode : 'm'.charCodeAt(0) });
@@ -187,6 +195,11 @@ THREEx.ClusterPlot3d = function(plot_options) {
 		var light = new THREE.PointLight(this.options.color_light);
 		light.position.set(this.options.light_x, this.options.light_y, this.options.light_z);
 		this.scene.add(light);
+
+
+		var light2 = new THREE.PointLight(this.options.color_light);
+		light2.position.set(0, 0, 0);
+		this.scene.add(light2);
 
 		this.intersected = null;
 
@@ -232,11 +245,17 @@ THREEx.ClusterPlot3d = function(plot_options) {
 						{
 							// store reference to closest object as current intersection object
 							this.intersected = intersect_obj;
+							if(this.options.highlight_selected) {
+								// store color of closest object (for later restoration)
+								this.intersected.currentHex = this.intersected.material.color.getHex();
+								// set a new color for closest object
+								this.intersected.material.color.setHex( this.options.selected_item_color );
+							} else if (typeof this.intersected.currentHex != "undefined" && this.intersected.currentHex){
+								this.intersected.material.color.setHex( this.intersected.currentHex );
+							}
 
-							// store color of closest object (for later restoration)
-							this.intersected.currentHex = this.intersected.material.color.getHex();
-							// set a new color for closest object
-							this.intersected.material.color.setHex( this.options.selected_item_color );
+							this.execEvent("onHover", { mash_item : this.intersected, item : this.intersected.item_data, mouse : this.mouse });
+
 							break;	
 						}
 						inter_index++;
@@ -250,6 +269,8 @@ THREEx.ClusterPlot3d = function(plot_options) {
 
 					if ( this.intersected ) 
 						this.intersected.material.color.setHex( this.intersected.currentHex );
+
+					this.execEvent("onHoverOut", { mash_item : this.intersected, item : this.intersected.item_data, mouse : this.mouse });
 					this.intersected = null;
 				}
 		}
@@ -359,6 +380,7 @@ THREEx.ClusterPlot3d = function(plot_options) {
 			var material = this.getMaterial(item_data.material, item_data.color);
 			var mesh = new THREE.Mesh( geometry, material );
 			mesh.name = item_data.title;
+			mesh.item_data = item_data;
 
 			if(item_data.type == THREEx.PLOT_TYPE.ITEM.BAR)
 				mesh.position.set(item_data.x,( item_data.y - item_data.size / 2) / 2, item_data.z);
@@ -368,7 +390,7 @@ THREEx.ClusterPlot3d = function(plot_options) {
 			item_data.mesh = mesh;
 			this.scene.add(mesh);
 
-			/*if(item_data.outline_color && item_data.outline_expand) {
+			if(item_data.outline_color && item_data.outline_expand) {
 				var outlineMaterial = new THREE.MeshBasicMaterial( { color: item_data.outline_color, side: THREE.BackSide } );
 				var outlineMesh = new THREE.Mesh( geometry, outlineMaterial );
 				outlineMesh.position.x = mesh.position.x;
@@ -376,11 +398,10 @@ THREEx.ClusterPlot3d = function(plot_options) {
 				outlineMesh.position.z = mesh.position.z;
 				outlineMesh.scale.multiplyScalar(item_data.outline_expand);
 				item_data.outlineMesh = outlineMesh;
-				outlineMesh.name = item_data.title;
 				this.scene.add( outlineMesh );
 			} else {
 				item_data.outlineMesh = null;
-			} */
+			}
 
 			this.execEvent("onItemLoad", { item : item_data });
 		}
@@ -440,7 +461,7 @@ THREEx.ClusterPlot3d = function(plot_options) {
 						var item_val = item[key];
 						if(typeof item_val == "underfined")
 							continue;
-						item_str += key + ' : ' + (item_val != null ? item_val : "null" ) + "<br />"
+						item_str += key + ' : ' + (item_val != null ? item_val : "null" ) + "\n"
 					}
 					return item_str;
 				},
