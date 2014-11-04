@@ -186,6 +186,9 @@ THREEx.ClusterPlot3d = function(plot_options) {
 		light.position.set(this.options.light_x, this.options.light_y, this.options.light_z);
 		this.scene.add(light);
 		
+
+		this.intersected = null;
+
 		// SKYBOX
 		var skyBoxGeometry = new THREE.BoxGeometry( 10000, 10000, 10000 );
 		var skyBoxMaterial = new THREE.MeshBasicMaterial( { color: this.options.color_bg_box, side: THREE.BackSide } );
@@ -199,7 +202,7 @@ THREEx.ClusterPlot3d = function(plot_options) {
 		this.update();
 		//this.
 	};
-	var this.intersected = null;
+
 	this.update = function(){
 		if ( this.keyboard.pressed("z") ) 
 		{	// do something   
@@ -217,9 +220,9 @@ THREEx.ClusterPlot3d = function(plot_options) {
 
 				// this.intersected = the object in the scene currently closest to the camera 
 				//		and this.intersected by the Ray projected from the mouse position 	
-				
+				console.log(intersects[0]);
 				// if there is one (or more) intersections
-				if ( intersects.length > 0 )
+				if ( intersects.length )
 				{		// if the closest object this.intersected is not the currently stored intersection object
 
 					// if there is one (or more) intersections
@@ -229,14 +232,14 @@ THREEx.ClusterPlot3d = function(plot_options) {
 							// store reference to closest object as current intersection object
 							this.intersected = intersects[ 0 ].object;
 							
-					} 
-					else // there are no intersections
-					{
-						// restore previous intersection object (if it exists) to its original color
-						// remove previous intersection object reference
-						//     by setting current intersection object to "nothing"
-						this.intersected = null;
 					}
+				} 
+				else // there are no intersections
+				{
+					// restore previous intersection object (if it exists) to its original color
+					// remove previous intersection object reference
+					//     by setting current intersection object to "nothing"
+					this.intersected = null;
 				}
 		}
 		this.controls.update();

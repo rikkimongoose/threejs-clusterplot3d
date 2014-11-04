@@ -91,6 +91,7 @@ THREEx.ClusterPlot3d = function(plot_options) {
 		steps_count : 20,
 		palette : THREEx.COLOR_PALETTE_TYPE.HSL,
 
+		show_skybox : false,
 		show_hint : true,
 		hint_color : 0xFFFF00,
 		hint_color_border : 0x000000
@@ -185,12 +186,17 @@ THREEx.ClusterPlot3d = function(plot_options) {
 		var light = new THREE.PointLight(this.options.color_light);
 		light.position.set(this.options.light_x, this.options.light_y, this.options.light_z);
 		this.scene.add(light);
-		
+
+		this.intersected = null;
+
 		// SKYBOX
-		var skyBoxGeometry = new THREE.BoxGeometry( 10000, 10000, 10000 );
-		var skyBoxMaterial = new THREE.MeshBasicMaterial( { color: this.options.color_bg_box, side: THREE.BackSide } );
-		var skyBox = new THREE.Mesh( skyBoxGeometry, skyBoxMaterial );
-		this.scene.add(skyBox);
+		if(this.options.show_skybox) {
+			var skyBoxGeometry = new THREE.BoxGeometry( 10000, 10000, 10000 );
+			var skyBoxMaterial = new THREE.MeshBasicMaterial( { color: this.options.color_bg_box, side: THREE.BackSide } );
+			var skyBox = new THREE.Mesh( skyBoxGeometry, skyBoxMaterial );
+			skyBox.name="SkyBox";
+			this.scene.add(skyBox);
+		}
 	}
 
 	this.animate = function() {
@@ -199,7 +205,7 @@ THREEx.ClusterPlot3d = function(plot_options) {
 		this.update();
 		//this.
 	};
-	var this.intersected = null;
+
 	this.update = function(){
 		if ( this.keyboard.pressed("z") ) 
 		{	// do something   
@@ -217,26 +223,26 @@ THREEx.ClusterPlot3d = function(plot_options) {
 
 				// this.intersected = the object in the scene currently closest to the camera 
 				//		and this.intersected by the Ray projected from the mouse position 	
-				
 				// if there is one (or more) intersections
-				if ( intersects.length > 0 )
+				if ( intersects.length )
 				{		// if the closest object this.intersected is not the currently stored intersection object
-
+						console.log("intersect");
 					// if there is one (or more) intersections
 						// if the closest object this.intersected is not the currently stored intersection object
+							console.log(intersects.length + ' - ' + intersects[0].object.name);
 						if ( intersects[ 0 ].object != this.intersected ) 
 						{
 							// store reference to closest object as current intersection object
 							this.intersected = intersects[ 0 ].object;
 							
-					} 
-					else // there are no intersections
-					{
-						// restore previous intersection object (if it exists) to its original color
-						// remove previous intersection object reference
-						//     by setting current intersection object to "nothing"
-						this.intersected = null;
 					}
+				} 
+				else // there are no intersections
+				{
+					// restore previous intersection object (if it exists) to its original color
+					// remove previous intersection object reference
+					//     by setting current intersection object to "nothing"
+					this.intersected = null;
 				}
 		}
 		this.controls.update();
@@ -344,6 +350,7 @@ THREEx.ClusterPlot3d = function(plot_options) {
 			var geometry = this.getGeometry(item_data.type, item_data.size, item_data);
 			var material = this.getMaterial(item_data.material, item_data.color);
 			var mesh = new THREE.Mesh( geometry, material );
+			mesh.name = item_data.title;\
 
 			if(item_data.type == THREEx.PLOT_TYPE.ITEM.BAR)
 				mesh.position.set(item_data.x,( item_data.y - item_data.size / 2) / 2, item_data.z);
@@ -361,6 +368,7 @@ THREEx.ClusterPlot3d = function(plot_options) {
 				outlineMesh.position.z = mesh.position.z;
 				outlineMesh.scale.multiplyScalar(item_data.outline_expand);
 				item_data.outlineMesh = outlineMesh;
+				outlineMesh.name = item_data.title;
 				this.scene.add( outlineMesh );
 			} else {
 				item_data.outlineMesh = null;
@@ -413,8 +421,21 @@ THREEx.ClusterPlot3d = function(plot_options) {
 			type : THREEx.PLOT_TYPE.ITEM.SPHERE
 		};
 
+		var ignored_values = [];
+
 		var default_rules = {
-			title : function() { return default_rules_values.title; },
+			title : function(item){ 
+					var item_str = '';
+					for(var key in item) {
+						if(ignored_values.indexOf(key) > 0)
+							continue;
+						var item_val = item[key];
+						if(typeof item_val == "underfined" || !item_val)
+							continue;
+						item_str += key + ' : ' + item[key] + "<br />"
+					}
+					return item_str;
+				},
 			x : function(item) { return (typeof item[0] != "undefined") ? item[0] : default_rules_values.x; },
 			y : function(item) { return (typeof item[1] != "undefined") ? item[1] : default_rules_values.y; },
 			z : function(item) { return (typeof item[2] != "undefined") ? item[2] : default_rules_values.z; },
