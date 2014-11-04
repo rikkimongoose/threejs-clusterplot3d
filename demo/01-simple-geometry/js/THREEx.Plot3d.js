@@ -243,6 +243,10 @@ THREEx.ClusterPlot3d = function(plot_options) {
 						var intersect_obj = intersects[inter_index].object;
 						if ( intersect_obj != this.intersected && intersect_obj.name ) 
 						{
+							if (this.intersected && typeof this.intersected.currentHex != "undefined" && this.intersected.currentHex){
+								this.intersected.material.color.setHex( this.intersected.currentHex );
+							}
+							
 							// store reference to closest object as current intersection object
 							this.intersected = intersect_obj;
 							if(this.options.highlight_selected) {
@@ -250,10 +254,7 @@ THREEx.ClusterPlot3d = function(plot_options) {
 								this.intersected.currentHex = this.intersected.material.color.getHex();
 								// set a new color for closest object
 								this.intersected.material.color.setHex( this.options.selected_item_color );
-							} else if (typeof this.intersected.currentHex != "undefined" && this.intersected.currentHex){
-								this.intersected.material.color.setHex( this.intersected.currentHex );
 							}
-
 							this.execEvent("onHover", { mash_item : this.intersected, item : this.intersected.item_data, mouse : this.mouse });
 
 							break;	
