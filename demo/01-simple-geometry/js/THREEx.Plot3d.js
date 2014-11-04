@@ -93,6 +93,7 @@ THREEx.ClusterPlot3d = function(plot_options) {
 
 		show_skybox : false,
 		show_hint : true,
+		selected_item_color : 0xFFFFFF,
 		hint_color : 0xFFFF00,
 		hint_color_border : 0x000000
 	};
@@ -127,11 +128,11 @@ THREEx.ClusterPlot3d = function(plot_options) {
 			if(this.show_hint && this.hint_sprite) {
 				this.hint_sprite.position.set( event.clientX, event.clientY - 20, 0 );
 			}
-			
+			//console.log(event.clientX + 'x' + event.clientY);
 			// update the mouse variable
 			this.mouse = {
 				x : ( event.clientX / this.renderer.domElement.clientWidth )  * 2 - 1,
-				y : ( event.clientY / this.renderer.domElement.clientHeight ) * 2 + 1
+				y : -( event.clientY / this.renderer.domElement.clientHeight ) * 2 + 1
 			};
 	};
 
@@ -216,25 +217,29 @@ THREEx.ClusterPlot3d = function(plot_options) {
 				var vector = new THREE.Vector3( this.mouse.x, this.mouse.y, 1 );
 				this.projector.unprojectVector( vector, this.camera );
 				var ray = new THREE.Raycaster( this.camera.position, vector.sub( this.camera.position ).normalize() );
-
-
 				// create an array containing all objects in the scene with which the ray intersects
-				var intersects = ray.intersectObjects( this.scene.children );
+				var intersects = ray.intersectObjects( this.scene.children, true );
 
 				// this.intersected = the object in the scene currently closest to the camera 
 				//		and this.intersected by the Ray projected from the mouse position 	
 				// if there is one (or more) intersections
 				if ( intersects.length )
-				{		// if the closest object this.intersected is not the currently stored intersection object
-						console.log("intersect");
-					// if there is one (or more) intersections
-						// if the closest object this.intersected is not the currently stored intersection object
-							console.log(intersects.length + ' - ' + intersects[0].object.name);
-						if ( intersects[ 0 ].object != this.intersected ) 
+				{
+					var inter_index = 0;
+					while(inter_index < intersects.length){
+						var intersect_obj = intersects[inter_index].object;
+						if ( intersect_obj != this.intersected && intersect_obj.name ) 
 						{
 							// store reference to closest object as current intersection object
-							this.intersected = intersects[ 0 ].object;
-							
+							this.intersected = intersect_obj;
+
+							// store color of closest object (for later restoration)
+							this.intersected.currentHex = this.intersected.material.color.getHex();
+							// set a new color for closest object
+							this.intersected.material.color.setHex( this.options.selected_item_color );
+							break;	
+						}
+						inter_index++;
 					}
 				} 
 				else // there are no intersections
@@ -242,6 +247,9 @@ THREEx.ClusterPlot3d = function(plot_options) {
 					// restore previous intersection object (if it exists) to its original color
 					// remove previous intersection object reference
 					//     by setting current intersection object to "nothing"
+
+					if ( this.intersected ) 
+						this.intersected.material.color.setHex( this.intersected.currentHex );
 					this.intersected = null;
 				}
 		}
@@ -350,7 +358,7 @@ THREEx.ClusterPlot3d = function(plot_options) {
 			var geometry = this.getGeometry(item_data.type, item_data.size, item_data);
 			var material = this.getMaterial(item_data.material, item_data.color);
 			var mesh = new THREE.Mesh( geometry, material );
-			mesh.name = item_data.title;\
+			mesh.name = item_data.title;
 
 			if(item_data.type == THREEx.PLOT_TYPE.ITEM.BAR)
 				mesh.position.set(item_data.x,( item_data.y - item_data.size / 2) / 2, item_data.z);
@@ -360,7 +368,7 @@ THREEx.ClusterPlot3d = function(plot_options) {
 			item_data.mesh = mesh;
 			this.scene.add(mesh);
 
-			if(item_data.outline_color && item_data.outline_expand) {
+			/*if(item_data.outline_color && item_data.outline_expand) {
 				var outlineMaterial = new THREE.MeshBasicMaterial( { color: item_data.outline_color, side: THREE.BackSide } );
 				var outlineMesh = new THREE.Mesh( geometry, outlineMaterial );
 				outlineMesh.position.x = mesh.position.x;
@@ -372,7 +380,7 @@ THREEx.ClusterPlot3d = function(plot_options) {
 				this.scene.add( outlineMesh );
 			} else {
 				item_data.outlineMesh = null;
-			}
+			} */
 
 			this.execEvent("onItemLoad", { item : item_data });
 		}
@@ -430,9 +438,9 @@ THREEx.ClusterPlot3d = function(plot_options) {
 						if(ignored_values.indexOf(key) > 0)
 							continue;
 						var item_val = item[key];
-						if(typeof item_val == "underfined" || !item_val)
+						if(typeof item_val == "underfined")
 							continue;
-						item_str += key + ' : ' + item[key] + "<br />"
+						item_str += key + ' : ' + (item_val != null ? item_val : "null" ) + "<br />"
 					}
 					return item_str;
 				},
