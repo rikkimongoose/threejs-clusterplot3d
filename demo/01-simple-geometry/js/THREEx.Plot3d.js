@@ -27,6 +27,11 @@ THREEx.PLOT_TYPE =
 		}
 	};
 
+THREEx.ORIENTATION = {
+	DEFAULT : 0,
+	RUSSIAN : 1
+};
+
 /*
 * Geometry for plot
 */
@@ -67,6 +72,7 @@ THREEx.ClusterPlot3d = function(plot_options) {
 		show_stats : false,
 		stratch : true,
 		show_grids : true,
+		grids_orientation : THREEx.ORIENTATION.RUSSIAN,
 
 		color_bg_box : 0xffffff,
 		color_light : 0xffffff,
@@ -316,6 +322,20 @@ THREEx.ClusterPlot3d = function(plot_options) {
 		gridYZ.rotation.z = Math.PI/2;
 		gridYZ.setColors( new THREE.Color(this.options.color_yz_central), new THREE.Color(this.options.color_yz) );
 		this.scene.add(gridYZ);
+
+		switch(this.options.grids_orientation)
+		{
+			case THREEx.ORIENTATION.DEFAULT:
+				this.gridXZ = gridXZ;
+				this.gridXY = gridXY;
+				this.gridYZ = gridYZ;
+			break;
+			case THREEx.ORIENTATION.RUSSIAN:
+				this.gridXZ = gridXY;
+				this.gridXY = gridYZ;
+				this.gridYZ = gridXZ;
+			break;
+		}
 	}
 
 	this.getGeometry = function(item_type, size, position){
@@ -383,10 +403,29 @@ THREEx.ClusterPlot3d = function(plot_options) {
 			mesh.name = item_data.title;
 			mesh.item_data = item_data;
 
+			var pos = {
+				x : null,
+				y : null,
+				z : null
+			};
+			switch(this.options.grids_orientation)
+			{
+				case THREEx.ORIENTATION.DEFAULT:
+					pos.x = item_data.x;
+					pos.y = item_data.y;
+					pos.z = item_data.z;
+				break;
+				case THREEx.ORIENTATION.RUSSIAN:
+					pos.x = item_data.x;
+					pos.y = item_data.z;
+					pos.z = item_data.y;
+				break;
+			}
+
 			if(item_data.type == THREEx.PLOT_TYPE.ITEM.BAR)
-				mesh.position.set(item_data.x,( item_data.y - item_data.size / 2) / 2, item_data.z);
+				mesh.position.set(pos.x,( pos.y - item_data.size / 2) / 2, pos.z);
 			else
-				mesh.position.set(item_data.x, item_data.y, item_data.z);
+				mesh.position.set(pos.x, pos.y, pos.z);
 
 			item_data.mesh = mesh;
 			this.scene.add(mesh);
