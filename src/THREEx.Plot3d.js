@@ -27,6 +27,11 @@ THREEx.PLOT_TYPE =
 		}
 	};
 
+THREEx.ORIENTATION = {
+	DEFAULT : 0,
+	RUSSIAN : 1
+};
+
 /*
 * Geometry for plot
 */
@@ -67,6 +72,7 @@ THREEx.ClusterPlot3d = function(plot_options) {
 		show_stats : false,
 		stratch : true,
 		show_grids : true,
+		grids_orientation : THREEx.ORIENTATION.RUSSIAN,
 
 		color_bg_box : 0xffffff,
 		color_light : 0xffffff,
@@ -116,25 +122,24 @@ THREEx.ClusterPlot3d = function(plot_options) {
 	this.hint_sprite = null;
 	this.mouse = null;
     
-
 	THREEx._plots3d.push(this);
 	
 	this.onDocumentMouseMove = function( event ) 
 	{
-			// the following line would stop any other event handler from firing
-			// (such as the mouse's TrackballControls)
-			// event.preventDefault();
+		// the following line would stop any other event handler from firing
+		// (such as the mouse's TrackballControls)
+		// event.preventDefault();
 
-			// update sprite position
-			if(this.show_hint && this.hint_sprite) {
-				this.hint_sprite.position.set( event.clientX, event.clientY - 20, 0 );
-			}
-			//console.log(event.clientX + 'x' + event.clientY);
-			// update the mouse variable
-			this.mouse = {
-				x : ( event.clientX / this.renderer.domElement.clientWidth )  * 2 - 1,
-				y : -( event.clientY / this.renderer.domElement.clientHeight ) * 2 + 1
-			};
+		// update sprite position
+		if(this.show_hint && this.hint_sprite) {
+			this.hint_sprite.position.set( event.clientX, event.clientY - 20, 0 );
+		}
+		//console.log(event.clientX + 'x' + event.clientY);
+		// update the mouse variable
+		this.mouse = {
+			x : ( event.clientX / this.renderer.domElement.clientWidth )  * 2 - 1,
+			y : -( event.clientY / this.renderer.domElement.clientHeight ) * 2 + 1
+		};
 	};
 
 	this.init = function() {
@@ -192,6 +197,10 @@ THREEx.ClusterPlot3d = function(plot_options) {
 		}
 
 		// LIGHT
+		this.options.light_x = this.options.steps_size * 4;
+		this.options.light_y = this.options.steps_size * 3;
+		this.options.light_z = this.options.steps_size * 4;
+
 		var light = new THREE.PointLight(this.options.color_light);
 		light.position.set(this.options.light_x, this.options.light_y, this.options.light_z);
 		this.scene.add(light);
@@ -255,7 +264,7 @@ THREEx.ClusterPlot3d = function(plot_options) {
 								// set a new color for closest object
 								this.intersected.material.color.setHex( this.options.selected_item_color );
 							}
-							this.execEvent("onHover", { mash_item : this.intersected, item : this.intersected.item_data, mouse : this.mouse });
+							this.execEvent("onHover", { mash_item : this.intersected, item : this.intersected ? this.intersected.item_data : null, mouse : this.mouse });
 
 							break;	
 						}
@@ -268,10 +277,10 @@ THREEx.ClusterPlot3d = function(plot_options) {
 					// remove previous intersection object reference
 					//     by setting current intersection object to "nothing"
 
-					if ( this.intersected ) 
+					if ( this.intersected ) {
 						this.intersected.material.color.setHex( this.intersected.currentHex );
-
-					this.execEvent("onHoverOut", { mash_item : this.intersected, item : this.intersected.item_data, mouse : this.mouse });
+						this.execEvent("onHoverOut", { mash_item : this.intersected, item : this.intersected.item_data, mouse : this.mouse });
+					}
 					this.intersected = null;
 				}
 		}
@@ -302,20 +311,34 @@ THREEx.ClusterPlot3d = function(plot_options) {
 	this.grids = function(){
 		var gridXZ = new THREE.GridHelper(this.grid_options.xz.size, this.grid_options.xz.step);
 		gridXZ.setColors( new THREE.Color(this.options.color_xz_central), new THREE.Color(this.options.color_xz) );
-		gridXZ.position.set( 100,0,100 );
+		gridXZ.position.set( this.options.steps_size, 0, this.options.steps_size );
 		this.scene.add(gridXZ);
 			
 		var gridXY = new THREE.GridHelper(this.grid_options.xy.size, this.grid_options.xy.step);
-		gridXY.position.set( 100,100,0 );
+		gridXY.position.set( this.options.steps_size, this.options.steps_size, 0 );
 		gridXY.rotation.x = Math.PI/2;
 		gridXY.setColors( new THREE.Color(this.options.color_xy_central), new THREE.Color(this.options.color_xy) );
 		this.scene.add(gridXY);
 
 		var gridYZ = new THREE.GridHelper(this.grid_options.yz.size, this.grid_options.yz.step);
-		gridYZ.position.set( 0,100,100 );
+		gridYZ.position.set( 0, this.options.steps_size, this.options.steps_size );
 		gridYZ.rotation.z = Math.PI/2;
 		gridYZ.setColors( new THREE.Color(this.options.color_yz_central), new THREE.Color(this.options.color_yz) );
 		this.scene.add(gridYZ);
+
+		switch(this.options.grids_orientation)
+		{
+			case THREEx.ORIENTATION.DEFAULT:
+				this.gridXZ = gridXZ;
+				this.gridXY = gridXY;
+				this.gridYZ = gridYZ;
+			break;
+			case THREEx.ORIENTATION.RUSSIAN:
+				this.gridXZ = gridXY;
+				this.gridXY = gridYZ;
+				this.gridYZ = gridYZ;
+			break;
+		}
 	}
 
 	this.getGeometry = function(item_type, size, position){
@@ -383,10 +406,29 @@ THREEx.ClusterPlot3d = function(plot_options) {
 			mesh.name = item_data.title;
 			mesh.item_data = item_data;
 
+			var pos = {
+				x : null,
+				y : null,
+				z : null
+			};
+			switch(this.options.grids_orientation)
+			{
+				case THREEx.ORIENTATION.DEFAULT:
+					pos.x = item_data.x;
+					pos.y = item_data.y;
+					pos.z = item_data.z;
+				break;
+				case THREEx.ORIENTATION.RUSSIAN:
+					pos.x = item_data.x;
+					pos.y = item_data.z;
+					pos.z = item_data.y;
+				break;
+			}
+
 			if(item_data.type == THREEx.PLOT_TYPE.ITEM.BAR)
-				mesh.position.set(item_data.x,( item_data.y - item_data.size / 2) / 2, item_data.z);
+				mesh.position.set(pos.x,( pos.y - item_data.size / 2) / 2, pos.z);
 			else
-				mesh.position.set(item_data.x, item_data.y, item_data.z);
+				mesh.position.set(pos.x, pos.y, pos.z);
 
 			item_data.mesh = mesh;
 			this.scene.add(mesh);

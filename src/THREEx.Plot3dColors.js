@@ -2,9 +2,11 @@
 var THREEx	= THREEx || {};
 
 THREEx.COLOR_PALETTE_TYPE = {
-	HSL : 1
+	HSL : 1,
+	SEMAPHORE : 2,
+	ICE : 3,
+	HOT : 4
 };
-
 THREEx.getColorsRange = function(n, palette) {
 	if(typeof palette == "undefined" || !palette)
 		palette = THREEx.COLOR_PALETTE_TYPE.HSL;
@@ -82,10 +84,10 @@ THREEx.getColorsRange = function(n, palette) {
 			console.warn('HSL palette allows only 180 colors. With %s categories some of categories will have same color', n)
 
 		var hue_from = 0,
-			hue_to = 180,
+			hue_to = 200,
 			hue = seq(hue_from, hue_to, n),
 			saturation = 100,
-			luminance = 70;
+			luminance = 50;
 
 		var colors_result = [];
 
@@ -93,10 +95,66 @@ THREEx.getColorsRange = function(n, palette) {
 			colors_result.push(hsltonum(hsl(hue[i], saturation, luminance)));
 
 		return colors_result;
-	};
+	}
+
+	function semaphorePalette(n) {
+		if(n > 180)
+			console.warn('HSL palette allows only 180 colors. With %s categories some of categories will have same color', n)
+
+		var hue = seq(0, 120, n),
+			saturation = 100,
+			luminance = 50;
+
+		var colors_result = [];
+
+		for(var i = 0, len = hue.length; i < len; i++)
+			colors_result.push(hsltonum(hsl(hue[i], saturation, luminance)));
+
+		return colors_result;
+	}
+
+	function icePalette(n) {
+		if(n > 180)
+			console.warn('HSL palette allows only 180 colors. With %s categories some of categories will have same color', n)
+
+		var hue = seq(120, 240, n),
+			saturation = 100,
+			luminance = 50;
+
+		var colors_result = [];
+
+		for(var i = 0, len = hue.length; i < len; i++)
+			colors_result.push(hsltonum(hsl(hue[i], saturation, luminance)));
+
+		return colors_result;
+	}
+
+	function hotPalette(n) {
+		if(n > 180)
+			console.warn('HSL palette allows only 180 colors. With %s categories some of categories will have same color', n)
+
+		var hue = seq(0, 60, n),
+			saturation = 100,
+			luminance = 50;
+
+		var colors_result = [];
+
+		for(var i = 0, len = hue.length; i < len; i++)
+			colors_result.push(hsltonum(hsl(hue[i], saturation, luminance)));
+
+		return colors_result;
+	}
 
 	switch(palette)
 	{
+		case THREEx.COLOR_PALETTE_TYPE.HSL:
+			return hslPalette(n);
+		case THREEx.COLOR_PALETTE_TYPE.SEMAPHORE:
+			return semaphorePalette(n);
+		case THREEx.COLOR_PALETTE_TYPE.ICE:
+			return icePalette(n);
+		case THREEx.COLOR_PALETTE_TYPE.HOT:
+			return hotPalette(n);
 		default:
 			return hslPalette(n);
 	}
