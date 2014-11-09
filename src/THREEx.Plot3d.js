@@ -109,7 +109,7 @@ THREEx.ClusterPlot3d = function(plot_options) {
 		steps_count : 20,
 		palette : THREEx.COLOR_PALETTE_TYPE.HSL,
 
-		show_skybox : false,
+		show_skybox : true,
 		highlight_selected : true,
 		show_hint : true,
 		selected_item_color : 0xFFFFFF,
@@ -229,7 +229,7 @@ THREEx.ClusterPlot3d = function(plot_options) {
 			var skyBoxGeometry = new THREE.BoxGeometry( 10000, 10000, 10000 );
 			var skyBoxMaterial = new THREE.MeshBasicMaterial( { color: this.options.color_bg_box, side: THREE.BackSide } );
 			var skyBox = new THREE.Mesh( skyBoxGeometry, skyBoxMaterial );
-			skyBox.name="SkyBox";
+			skyBox.name=null;
 			this.scene.add(skyBox);
 		}
 	}
@@ -252,7 +252,13 @@ THREEx.ClusterPlot3d = function(plot_options) {
 				this.projector.unprojectVector( vector, this.camera );
 				var ray = new THREE.Raycaster( this.camera.position, vector.sub( this.camera.position ).normalize() );
 				// create an array containing all objects in the scene with which the ray intersects
-				var intersects = ray.intersectObjects( this.scene.children, true );
+				var intersects_raw = ray.intersectObjects( this.scene.children, true );
+				var intersects = [];
+
+				for(var i = 0, l = intersects_raw.length; i < l; i++){
+					if(intersects_raw[i].object.name)
+						intersects.push(intersects_raw[i]);
+				}
 
 				// this.intersected = the object in the scene currently closest to the camera 
 				//		and this.intersected by the Ray projected from the mouse position 	
