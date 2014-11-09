@@ -1,3 +1,15 @@
+/*
+ThreeJS Cluster Plot 3D
+
+3D clustering plot based on ThreeJS library.
+
+by Rikki Mongoose
+
+See updates at http://github.com/rikkimongoose/threejs-clusterplot3d 
+
+*/
+
+
 /** @namespace */
 var THREEx	= THREEx || {};
 
