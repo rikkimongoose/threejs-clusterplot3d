@@ -84,7 +84,7 @@ THREEx.ClusterPlot3d = function(plot_options) {
 		show_stats : false,
 		stratch : true,
 		show_grids : true,
-		grids_orientation : THREEx.ORIENTATION.RUSSIAN,
+		grids_orientation : THREEx.ORIENTATION.DEFAULT,
 
 		color_bg_box : 0xffffff,
 		color_light : 0xffffff,
