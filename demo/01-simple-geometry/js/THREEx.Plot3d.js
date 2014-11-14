@@ -508,7 +508,7 @@ THREEx.ClusterPlot3d = function(plot_options) {
 			outline_expand : 1.2,
 			material : THREEx.PLOT_TYPE.MATERIAL.LAMBER,
 			size : 1,
-			type : THREEx.PLOT_TYPE.ITEM.SPHERE
+			type : THREEx.PLOT_TYPE.ITEM.CUBE
 		};
 
 		var ignored_values = [];
@@ -529,12 +529,12 @@ THREEx.ClusterPlot3d = function(plot_options) {
 			x : function(item) { return (typeof item[0] != "undefined") ? item[0] : default_rules_values.x; },
 			y : function(item) { return (typeof item[1] != "undefined") ? item[1] : default_rules_values.y; },
 			z : function(item) { return (typeof item[2] != "undefined") ? item[2] : default_rules_values.z; },
+			size : function(item) { return (typeof item[3] != "undefined") ? item[3] : default_rules_values.size; },
 			color : function() { return default_rules_values.color; },
 			outline_color : function() { return default_rules_values.outline_color; },
 			outline_expand : function() { return default_rules_values.outline_expand; },
 			material : function() { return default_rules_values.material; },
-			size : function(item) { return (typeof item[3] != "undefined") ? item[3] : default_rules_values.size; },
-			type : function() { return THREEx.PLOT_TYPE.ITEM.SPHERE; }
+			type : function() { return default_rules_values.type; }
 		};
 
 		function get_rule_value(rule_key, is_normalised) {
@@ -543,7 +543,7 @@ THREEx.ClusterPlot3d = function(plot_options) {
 					return { func: rules[rule_key], is_changed : true };
 				return { func: function(item) { return item[rules[rule_key]]; }, is_changed : true };
 			}
-			var rule_key_const = rule_key + "-const";
+			var rule_key_const = rule_key + "_const";
 			if(typeof rules[rule_key_const] != "undefined")
 				return { func : function() { return rules[rule_key_const] }, is_changed : false };
 			if(typeof default_rules[rule_key] != "undefined")

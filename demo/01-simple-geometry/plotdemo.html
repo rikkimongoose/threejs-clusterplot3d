@@ -39,7 +39,7 @@
 			var index = 1;
 			var plot = THREEx.doPlot3d("ThreeJS",
 				source_data,
-				{color: 4},
+				{ color: 4, type_const : THREEx.PLOT_TYPE.ITEM.SPHERE },
 				{},
 				function(o, e) {
 					$('#ThreeJSBackground-Text').html('Loading ' + index + ' of ' + source_data_len);
