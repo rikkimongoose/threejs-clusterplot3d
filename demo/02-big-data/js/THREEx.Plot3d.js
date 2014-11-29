@@ -39,11 +39,6 @@ THREEx.PLOT_TYPE =
 		}
 	};
 
-THREEx.ORIENTATION = {
-	DEFAULT : 0,
-	RUSSIAN : 1
-};
-
 /*
 * Geometry for plot
 */
@@ -84,7 +79,6 @@ THREEx.ClusterPlot3d = function(plot_options) {
 		show_stats : false,
 		stratch : true,
 		show_grids : true,
-		grids_orientation : THREEx.ORIENTATION.DEFAULT,
 
 		color_bg_box : 0xffffff,
 		color_light : 0xffffff,
@@ -114,10 +108,7 @@ THREEx.ClusterPlot3d = function(plot_options) {
 		show_hint : true,
 		selected_item_color : 0xFFFFFF,
 		hint_color : 0xFFFF00,
-		hint_color_border : 0x000000,
-
-		unite_items : true,
-		eps : 0.01
+		hint_color_border : 0x000000
 	};
 
 	this.options = {};
@@ -347,19 +338,9 @@ THREEx.ClusterPlot3d = function(plot_options) {
 		gridYZ.setColors( new THREE.Color(this.options.color_yz_central), new THREE.Color(this.options.color_yz) );
 		this.scene.add(gridYZ);
 
-		switch(this.options.grids_orientation)
-		{
-			case THREEx.ORIENTATION.DEFAULT:
-				this.gridXZ = gridXZ;
-				this.gridXY = gridXY;
-				this.gridYZ = gridYZ;
-			break;
-			case THREEx.ORIENTATION.RUSSIAN:
-				this.gridXZ = gridXY;
-				this.gridXY = gridYZ;
-				this.gridYZ = gridYZ;
-			break;
-		}
+		this.gridXZ = gridXZ;
+		this.gridXY = gridXY;
+		this.gridYZ = gridYZ;
 	}
 
 	this.getGeometry = function(item_type, size, position){
@@ -419,33 +400,6 @@ THREEx.ClusterPlot3d = function(plot_options) {
 
 	this.draw_plot = function() {
 		var item_data_index = this.parsed_data.length;
-		var already_added_items = {
-			items : [],
-			push : function(mesh_data, item_data){
-				items.push({
-					x : item_data.x,
-					y : item_data.y,
-					z : item_data.z,
-					size : item_data.size,
-					mesh : mesh_data
-				});
-			},
-			item_for : function(x, y, z, size, eps){
-				function eps_comp(a1, a2, eps) {
-					return Math.abs(a1 - a2) < eps;
-				}
-				for(var i = 0, l = items.length; i < l; i++){
-					var item = this.items[i];
-					if(eps_comp(item.x, x, eps) && eps_comp(item.y, y, eps) && eps_comp(item.z, z, eps))
-						return item;
-					//проверь size
-				}
-			}
-			mesh_for : function(item_data, eps){
-
-			}
-		};
-
 		while(item_data_index--) {
 			var item_data = this.parsed_data[item_data_index];
 			var geometry = this.getGeometry(item_data.type, item_data.size, item_data);
@@ -459,19 +413,10 @@ THREEx.ClusterPlot3d = function(plot_options) {
 				y : null,
 				z : null
 			};
-			switch(this.options.grids_orientation)
-			{
-				case THREEx.ORIENTATION.DEFAULT:
-					pos.x = item_data.x;
-					pos.y = item_data.y;
-					pos.z = item_data.z;
-				break;
-				case THREEx.ORIENTATION.RUSSIAN:
-					pos.x = item_data.x;
-					pos.y = item_data.z;
-					pos.z = item_data.y;
-				break;
-			}
+
+			pos.x = item_data.x;
+			pos.y = item_data.y;
+			pos.z = item_data.z;
 
 			if(item_data.type == THREEx.PLOT_TYPE.ITEM.BAR)
 				mesh.position.set(pos.x,( pos.y - item_data.size / 2) / 2, pos.z);
