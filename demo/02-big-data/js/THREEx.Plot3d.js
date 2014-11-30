@@ -70,6 +70,12 @@ THREEx.CONST_GEO =
 		}
 	};
 
+THREEx.CONST_ITEMS_MODE =
+	{
+		GEOMETRY : 0,
+		PARTICLE : 1
+	};
+
 THREEx.ClusterPlot3d = function(plot_options) {
 	this.keyboard = new THREEx.KeyboardState();
 	this.clock = new THREE.Clock
@@ -108,7 +114,9 @@ THREEx.ClusterPlot3d = function(plot_options) {
 		show_hint : true,
 		selected_item_color : 0xFFFFFF,
 		hint_color : 0xFFFF00,
-		hint_color_border : 0x000000
+		hint_color_border : 0x000000,
+
+		item_view_mode: THREEx.CONST_ITEMS_MODE.GEOMETRY
 	};
 
 	this.options = {};
@@ -166,8 +174,14 @@ THREEx.ClusterPlot3d = function(plot_options) {
 		}*/
 		this.scene = new THREE.Scene();
 		// CAMERA
-		var screen_width = this.container.clientWidth, screen_height = this.container.clientHeight;
-		var VIEW_ANGLE = this.options.camera_angle, ASPECT = screen_width / screen_height, NEAR = 0.1, FAR = 20000;
+		var screen_width = this.container.clientWidth,
+			screen_height = this.container.clientHeight,
+
+			VIEW_ANGLE = this.options.camera_angle,
+			ASPECT = screen_width / screen_height,
+			NEAR = 0.1,
+			FAR = 20000;
+
 		this.camera = new THREE.PerspectiveCamera( VIEW_ANGLE, ASPECT, NEAR, FAR);
 		this.scene.add(this.camera);
 		this.camera.position.set(this.options.camera_x, this.options.camera_y, this.options.camera_z);
@@ -260,7 +274,7 @@ THREEx.ClusterPlot3d = function(plot_options) {
 				if ( intersects.length )
 				{
 					var inter_index = 0;
-					while(inter_index < intersects.length){
+					for(var inter_index = 0, intersects_length = intersects.length; inter_index < intersects_length; inter_index++){
 						var intersect_obj = intersects[inter_index].object;
 						if ( intersect_obj != this.intersected && intersect_obj.name ) 
 						{
@@ -277,10 +291,8 @@ THREEx.ClusterPlot3d = function(plot_options) {
 								this.intersected.material.color.setHex( this.options.selected_item_color );
 							}
 							this.execEvent("onHover", { mash_item : this.intersected, item : this.intersected ? this.intersected.item_data : null, mouse : this.mouse });
-
 							break;	
 						}
-						inter_index++;
 					}
 				} 
 				else // there are no intersections
@@ -320,7 +332,9 @@ THREEx.ClusterPlot3d = function(plot_options) {
 		}
 	};
 
-	this.grids = function(){
+	this.grids = function() {
+		var halfPI = Math.PI/2;
+
 		var gridXZ = new THREE.GridHelper(this.grid_options.xz.size, this.grid_options.xz.step);
 		gridXZ.setColors( new THREE.Color(this.options.color_xz_central), new THREE.Color(this.options.color_xz) );
 		gridXZ.position.set( this.options.steps_size, 0, this.options.steps_size );
@@ -328,13 +342,13 @@ THREEx.ClusterPlot3d = function(plot_options) {
 			
 		var gridXY = new THREE.GridHelper(this.grid_options.xy.size, this.grid_options.xy.step);
 		gridXY.position.set( this.options.steps_size, this.options.steps_size, 0 );
-		gridXY.rotation.x = Math.PI/2;
+		gridXY.rotation.x = halfPI;
 		gridXY.setColors( new THREE.Color(this.options.color_xy_central), new THREE.Color(this.options.color_xy) );
 		this.scene.add(gridXY);
 
 		var gridYZ = new THREE.GridHelper(this.grid_options.yz.size, this.grid_options.yz.step);
 		gridYZ.position.set( 0, this.options.steps_size, this.options.steps_size );
-		gridYZ.rotation.z = Math.PI/2;
+		gridYZ.rotation.z = halfPI;
 		gridYZ.setColors( new THREE.Color(this.options.color_yz_central), new THREE.Color(this.options.color_yz) );
 		this.scene.add(gridYZ);
 
@@ -354,16 +368,18 @@ THREEx.ClusterPlot3d = function(plot_options) {
 			return new THREE.BoxGeometry(radius, position.z - radius / 2, radius);
 		}
 
-		if(item_type == THREEx.PLOT_TYPE.ITEM.SPHERE)
-			return getSphereGeometry(size);
-		else if(item_type == THREEx.PLOT_TYPE.ITEM.CUBE)
-			return getCubeGeometry(size * 2);
-		else if(item_type == THREEx.PLOT_TYPE.ITEM.BAR)
-			return getBarGeometry(size, position);
+		switch(item_type)
+		{
+			case THREEx.PLOT_TYPE.ITEM.SPHERE:
+				return getSphereGeometry(size);
+			case THREEx.PLOT_TYPE.ITEM.CUBE:
+				return getCubeGeometry(size * 2);
+			case THREEx.PLOT_TYPE.ITEM.BAR:
+				return getBarGeometry(size, position);
+		}
 
 		return null;
 	}
-
 
 	this.getMaterial = function(item_material, item_color){
 		function getBasicMaterial(properties){
@@ -378,13 +394,15 @@ THREEx.ClusterPlot3d = function(plot_options) {
 			return new THREE.MeshPhongMaterial(properties);
 		}
 
-		if(item_material == THREEx.PLOT_TYPE.MATERIAL.BASIC)
-			return getBasicMaterial( { color: item_color } );
-		else if(item_material == THREEx.PLOT_TYPE.MATERIAL.LAMBER)
-			return getLambertMaterial( { color: item_color } );
-		else if(item_material == THREEx.PLOT_TYPE.MATERIAL.PHONG)
-			return getPhongMaterial( { color: item_color } );
-
+		switch(item_material)
+		{
+			case THREEx.PLOT_TYPE.MATERIAL.BASIC:
+				return getBasicMaterial( { color: item_color } );
+			case THREEx.PLOT_TYPE.MATERIAL.LAMBER:
+				return getLambertMaterial( { color: item_color } );
+			case THREEx.PLOT_TYPE.MATERIAL.PHONG:
+				return getPhongMaterial( { color: item_color } );
+		}
 		return null;
 	}
 	
@@ -399,32 +417,32 @@ THREEx.ClusterPlot3d = function(plot_options) {
 	}
 
 	this.draw_plot = function() {
-		var item_data_index = this.parsed_data.length;
-		while(item_data_index--) {
-			var item_data = this.parsed_data[item_data_index];
-			var geometry = this.getGeometry(item_data.type, item_data.size, item_data);
-			var material = this.getMaterial(item_data.material, item_data.color);
+		debugger;
+		function draw_plot_material(plot, item_data) {
+			var geometry = plot.getGeometry(item_data.type, item_data.size, item_data);
+			var material = plot.getMaterial(item_data.material, item_data.color);
 			var mesh = new THREE.Mesh( geometry, material );
 			mesh.name = item_data.title;
 			mesh.item_data = item_data;
 
 			var pos = {
-				x : null,
-				y : null,
-				z : null
+				x : item_data.x,
+				y : item_data.y,
+				z : item_data.z
 			};
 
-			pos.x = item_data.x;
-			pos.y = item_data.y;
-			pos.z = item_data.z;
-
-			if(item_data.type == THREEx.PLOT_TYPE.ITEM.BAR)
-				mesh.position.set(pos.x,( pos.y - item_data.size / 2) / 2, pos.z);
-			else
-				mesh.position.set(pos.x, pos.y, pos.z);
+			switch(item_data.type)
+			{
+				case THREEx.PLOT_TYPE.ITEM.BAR:
+					mesh.position.set(pos.x, (pos.y - item_data.size / 2) / 2, pos.z);
+					break;
+				default:
+					mesh.position.set(pos.x, pos.y, pos.z);
+				break;
+			}
 
 			item_data.mesh = mesh;
-			this.scene.add(mesh);
+			plot.scene.add(mesh);
 
 			if(item_data.outline_color && item_data.outline_expand) {
 				var outlineMaterial = new THREE.MeshBasicMaterial( { color: item_data.outline_color, side: THREE.BackSide } );
@@ -434,11 +452,31 @@ THREEx.ClusterPlot3d = function(plot_options) {
 				outlineMesh.position.z = mesh.position.z;
 				outlineMesh.scale.multiplyScalar(item_data.outline_expand);
 				item_data.outlineMesh = outlineMesh;
-				this.scene.add( outlineMesh );
+				plot.scene.add( outlineMesh );
 			} else {
 				item_data.outlineMesh = null;
 			}
+		}
 
+		function draw_plot_particle(plot, item_data) {
+
+		}
+
+		var drawing_func = null;
+		switch(this.options.item_view_mode)
+		{
+			case THREEx.CONST_ITEMS_MODE.GEOMETRY:
+				 drawing_func = draw_plot_material;
+			break;
+			case THREEx.CONST_ITEMS_MODE.PARTICLE:
+				drawing_func = draw_plot_particle;
+			break;
+		}
+
+		var item_data_index = this.parsed_data.length;
+		while(item_data_index--) {
+			var item_data = this.parsed_data[item_data_index];
+			drawing_func(this, item_data);
 			this.execEvent("onItemLoad", { item : item_data });
 		}
 
