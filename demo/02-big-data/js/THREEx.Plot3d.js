@@ -417,49 +417,72 @@ THREEx.ClusterPlot3d = function(plot_options) {
 	}
 
 	this.draw_plot = function() {
-		debugger;
-		function draw_plot_material(plot, item_data) {
-			var geometry = plot.getGeometry(item_data.type, item_data.size, item_data);
-			var material = plot.getMaterial(item_data.material, item_data.color);
-			var mesh = new THREE.Mesh( geometry, material );
-			mesh.name = item_data.title;
-			mesh.item_data = item_data;
+		function draw_plot_material(plot, parsed_data) {
+			var item_data_index = parsed_data.length;
 
-			var pos = {
-				x : item_data.x,
-				y : item_data.y,
-				z : item_data.z
-			};
+			while(item_data_index--) {
+				var item_data = parsed_data[item_data_index];
 
-			switch(item_data.type)
-			{
-				case THREEx.PLOT_TYPE.ITEM.BAR:
-					mesh.position.set(pos.x, (pos.y - item_data.size / 2) / 2, pos.z);
+				var geometry = plot.getGeometry(item_data.type, item_data.size, item_data);
+				var material = plot.getMaterial(item_data.material, item_data.color);
+				var mesh = new THREE.Mesh( geometry, material );
+				mesh.name = item_data.title;
+				mesh.item_data = item_data;
+
+				var pos = {
+					x : item_data.x,
+					y : item_data.y,
+					z : item_data.z
+				};
+
+				switch(item_data.type)
+				{
+					case THREEx.PLOT_TYPE.ITEM.BAR:
+						mesh.position.set(pos.x, (pos.y - item_data.size / 2) / 2, pos.z);
+						break;
+					default:
+						mesh.position.set(pos.x, pos.y, pos.z);
 					break;
-				default:
-					mesh.position.set(pos.x, pos.y, pos.z);
-				break;
-			}
+				}
 
-			item_data.mesh = mesh;
-			plot.scene.add(mesh);
+				item_data.mesh = mesh;
+				plot.scene.add(mesh);
 
-			if(item_data.outline_color && item_data.outline_expand) {
-				var outlineMaterial = new THREE.MeshBasicMaterial( { color: item_data.outline_color, side: THREE.BackSide } );
-				var outlineMesh = new THREE.Mesh( geometry, outlineMaterial );
-				outlineMesh.position.x = mesh.position.x;
-				outlineMesh.position.y = mesh.position.y;
-				outlineMesh.position.z = mesh.position.z;
-				outlineMesh.scale.multiplyScalar(item_data.outline_expand);
-				item_data.outlineMesh = outlineMesh;
-				plot.scene.add( outlineMesh );
-			} else {
-				item_data.outlineMesh = null;
+				if(item_data.outline_color && item_data.outline_expand) {
+					var outlineMaterial = new THREE.MeshBasicMaterial( { color: item_data.outline_color, side: THREE.BackSide } );
+					var outlineMesh = new THREE.Mesh( geometry, outlineMaterial );
+					outlineMesh.position.x = mesh.position.x;
+					outlineMesh.position.y = mesh.position.y;
+					outlineMesh.position.z = mesh.position.z;
+					outlineMesh.scale.multiplyScalar(item_data.outline_expand);
+					item_data.outlineMesh = outlineMesh;
+					plot.scene.add( outlineMesh );
+				} else {
+					item_data.outlineMesh = null;
+				}
+				plot.execEvent("onItemLoad", { item : item_data });
 			}
 		}
 
 		function draw_plot_particle(plot, item_data) {
+			var geometry = new THREE.Geometry();
+			var material = plot.getMaterial(item_data.material, item_data.color);
 
+			var item_data_index = parsed_data.length;
+
+			while(item_data_index--) {
+				var item_data = this.parsed_data[item_data_index];
+				var particle = new THREE.Vector3(
+						item_data.x,
+						item_data.y,
+						item_data.z
+					);
+				geometry.vertices.push(particle);
+			}
+
+			var system = new THREE.ParticleSystem(geometry, material);
+			plot.scene.add(system);
+			plot.execEvent("onItemLoad", { item : item_data });
 		}
 
 		var drawing_func = null;
@@ -472,14 +495,7 @@ THREEx.ClusterPlot3d = function(plot_options) {
 				drawing_func = draw_plot_particle;
 			break;
 		}
-
-		var item_data_index = this.parsed_data.length;
-		while(item_data_index--) {
-			var item_data = this.parsed_data[item_data_index];
-			drawing_func(this, item_data);
-			this.execEvent("onItemLoad", { item : item_data });
-		}
-
+		drawing_func(this, this.parsed_data);
 		this.execEvent("onItemsLoaded", { items : this.parsed_data });
 	}
 
