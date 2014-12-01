@@ -116,7 +116,7 @@ THREEx.ClusterPlot3d = function(plot_options) {
 		hint_color : 0xFFFF00,
 		hint_color_border : 0x000000,
 
-		item_view_mode: THREEx.CONST_ITEMS_MODE.GEOMETRY
+		item_view_mode : THREEx.CONST_ITEMS_MODE.GEOMETRY
 	};
 
 	this.options = {};
@@ -449,14 +449,14 @@ THREEx.ClusterPlot3d = function(plot_options) {
 			}
 		}
 
-		function draw_plot_particle(plot, item_data) {
+		function draw_plot_particle(plot, parsed_data) {
 			var geometry = new THREE.Geometry();
-			var material = plot.getMaterial(item_data.material, item_data.color);
+			var material = new THREE.PointCloudMaterial( { size: 4, vertexColors: THREE.VertexColors } );
 
 			var item_data_index = parsed_data.length;
 
 			while(item_data_index--) {
-				var item_data = this.parsed_data[item_data_index];
+				var item_data = parsed_data[item_data_index];
 				var particle = new THREE.Vector3(
 						item_data.x,
 						item_data.y,
@@ -465,7 +465,7 @@ THREEx.ClusterPlot3d = function(plot_options) {
 				geometry.vertices.push(particle);
 			}
 
-			var system = new THREE.ParticleSystem(geometry, material);
+			var system = new THREE.PointCloud(geometry, material);
 			plot.scene.add(system);
 			plot.execEvent("onItemLoad", { item : item_data });
 		}
