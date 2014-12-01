@@ -450,19 +450,43 @@ THREEx.ClusterPlot3d = function(plot_options) {
 		}
 
 		function draw_plot_particle(plot, parsed_data) {
-			var geometry = new THREE.Geometry();
 			var material = new THREE.PointCloudMaterial( { size: 4, vertexColors: THREE.VertexColors } );
+
+			function getParticleMaterials(item_data){
+			 	return {
+			 		color : item_data.color,
+			 		size  : item_data.size
+			 	};
+			}
+
+			function cmpParticleMaterials(m1, m2){
+				return m1
+					&& m2
+					&& m1.color == m2.color
+					&& m1.size  == m2.size;
+			}
 
 			var item_data_index = parsed_data.length;
 
+			var item_data_sorted = [];
+
 			while(item_data_index--) {
 				var item_data = parsed_data[item_data_index];
-				var particle = new THREE.Vector3(
-						item_data.x,
-						item_data.y,
-						item_data.z
-					);
-				geometry.vertices.push(particle);
+				var item_data_material = getParticleMaterials(item_data);
+				
+			}
+			for(var i = 0, li = item_data_sorted.length; i < li; i++) {
+				var particle_class = item_data_sorted[i];
+				var geometry = new THREE.Geometry();
+				for(var j = 0, lj = particle_class.items.length; j < lj; j++) {
+					var particle_class_item_data = particle_class.items[j];
+					var particle = new THREE.Vector3(
+							particle_class_item_data.x,
+							particle_class_item_data.y,
+							particle_class_item_data.z
+						);
+					geometry.vertices.push(particle);
+				}
 			}
 
 			var system = new THREE.PointCloud(geometry, material);
