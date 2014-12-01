@@ -116,7 +116,7 @@ THREEx.ClusterPlot3d = function(plot_options) {
 		hint_color : 0xFFFF00,
 		hint_color_border : 0x000000,
 
-		item_view_mode: THREEx.CONST_ITEMS_MODE.GEOMETRY
+		item_view_mode : THREEx.CONST_ITEMS_MODE.GEOMETRY
 	};
 
 	this.options = {};
@@ -157,21 +157,6 @@ THREEx.ClusterPlot3d = function(plot_options) {
 	};
 
 	this.init = function() {
-		/*function load_sprite_alignment() {
-			THREE.SpriteAlignment = {};
-			THREE.SpriteAlignment.topLeft = new THREE.Vector2( 1, -1 );
-			THREE.SpriteAlignment.topCenter = new THREE.Vector2( 0, -1 );
-			THREE.SpriteAlignment.topRight = new THREE.Vector2( -1, -1 );
-			THREE.SpriteAlignment.centerLeft = new THREE.Vector2( 1, 0 );
-			THREE.SpriteAlignment.center = new THREE.Vector2( 0, 0 );
-			THREE.SpriteAlignment.centerRight = new THREE.Vector2( -1, 0 );
-			THREE.SpriteAlignment.bottomLeft = new THREE.Vector2( 1, 1 );
-			THREE.SpriteAlignment.bottomCenter = new THREE.Vector2( 0, 1 );
-			THREE.SpriteAlignment.bottomRight = new THREE.Vector2( -1, 1 );
-		}
-		if(typeof THREE.SpriteAlignment == "undefined"){
-			load_sprite_alignment();
-		}*/
 		this.scene = new THREE.Scene();
 		// CAMERA
 		var screen_width = this.container.clientWidth,
@@ -357,7 +342,7 @@ THREEx.ClusterPlot3d = function(plot_options) {
 		this.gridYZ = gridYZ;
 	}
 
-	this.getGeometry = function(item_type, size, position){
+	function getGeometry(item_type, size, position){
 		function getSphereGeometry(radius){
 			return new THREE.SphereGeometry( radius, THREEx.CONST_GEO.SPHERE.SEGMENTS.WIDTH, THREEx.CONST_GEO.SPHERE.SEGMENTS.HEIGHT);
 		}
@@ -370,18 +355,15 @@ THREEx.ClusterPlot3d = function(plot_options) {
 
 		switch(item_type)
 		{
-			case THREEx.PLOT_TYPE.ITEM.SPHERE:
-				return getSphereGeometry(size);
-			case THREEx.PLOT_TYPE.ITEM.CUBE:
-				return getCubeGeometry(size * 2);
-			case THREEx.PLOT_TYPE.ITEM.BAR:
-				return getBarGeometry(size, position);
+			case THREEx.PLOT_TYPE.ITEM.SPHERE : return getSphereGeometry(size);
+			case THREEx.PLOT_TYPE.ITEM.CUBE   : return getCubeGeometry(size * 2);
+			case THREEx.PLOT_TYPE.ITEM.BAR    : return getBarGeometry(size, position);
 		}
 
 		return null;
 	}
 
-	this.getMaterial = function(item_material, item_color){
+	function getMaterial(item_material, item_color){
 		function getBasicMaterial(properties){
 			return new THREE.MeshBasicMaterial(properties);
 		}
@@ -396,12 +378,9 @@ THREEx.ClusterPlot3d = function(plot_options) {
 
 		switch(item_material)
 		{
-			case THREEx.PLOT_TYPE.MATERIAL.BASIC:
-				return getBasicMaterial( { color: item_color } );
-			case THREEx.PLOT_TYPE.MATERIAL.LAMBER:
-				return getLambertMaterial( { color: item_color } );
-			case THREEx.PLOT_TYPE.MATERIAL.PHONG:
-				return getPhongMaterial( { color: item_color } );
+			case THREEx.PLOT_TYPE.MATERIAL.BASIC  : return getBasicMaterial( { color: item_color } );
+			case THREEx.PLOT_TYPE.MATERIAL.LAMBER : return getLambertMaterial( { color: item_color } );
+			case THREEx.PLOT_TYPE.MATERIAL.PHONG  : return getPhongMaterial( { color: item_color } );
 		}
 		return null;
 	}
@@ -423,8 +402,8 @@ THREEx.ClusterPlot3d = function(plot_options) {
 			while(item_data_index--) {
 				var item_data = parsed_data[item_data_index];
 
-				var geometry = plot.getGeometry(item_data.type, item_data.size, item_data);
-				var material = plot.getMaterial(item_data.material, item_data.color);
+				var geometry = getGeometry(item_data.type, item_data.size, item_data);
+				var material = getMaterial(item_data.material, item_data.color);
 				var mesh = new THREE.Mesh( geometry, material );
 				mesh.name = item_data.title;
 				mesh.item_data = item_data;
@@ -464,25 +443,70 @@ THREEx.ClusterPlot3d = function(plot_options) {
 			}
 		}
 
-		function draw_plot_particle(plot, item_data) {
-			var geometry = new THREE.Geometry();
-			var material = plot.getMaterial(item_data.material, item_data.color);
+		function draw_plot_particle(plot, parsed_data) {
 
-			var item_data_index = parsed_data.length;
-
-			while(item_data_index--) {
-				var item_data = this.parsed_data[item_data_index];
-				var particle = new THREE.Vector3(
-						item_data.x,
-						item_data.y,
-						item_data.z
-					);
-				geometry.vertices.push(particle);
+			function createParticleMaterial(item_data){
+			 	return {
+			 		color : item_data.color,
+			 		size  : item_data.size,
+			 		items : []
+			 	};
 			}
 
-			var system = new THREE.ParticleSystem(geometry, material);
-			plot.scene.add(system);
-			plot.execEvent("onItemLoad", { item : item_data });
+			function cmpParticleMaterials(m1, m2){
+				return m1
+					&& m2
+					&& m1.color == m2.color
+					&& m1.size  == m2.size;
+			}
+
+			function getParticleMaterial(particle_classes, item_data) {
+				var index = particle_classes.length;
+				while(index--){
+					var particle_class = particle_classes[index];
+					if(cmpParticleMaterials(particle_class, item_data))
+						return particle_class;
+				}
+				var new_material = createParticleMaterial(item_data);
+				particle_classes.push(new_material);
+				return new_material;
+			}
+
+			function do_show_patricles(plot, item_data_sorted){
+				for(var i = 0, li = item_data_sorted.length; i < li; i++) {
+					var particle_class = item_data_sorted[i];
+					var geometry = new THREE.Geometry();
+					var material = new THREE.PointCloudMaterial({
+						size : particle_class.size,
+						color : particle_class.color,
+						vertexColors : false
+					});
+					
+					for(var j = 0, lj = particle_class.items.length; j < lj; j++) {
+						var particle_class_item_data = particle_class.items[j];
+						var particle = new THREE.Vector3(
+								particle_class_item_data.x,
+								particle_class_item_data.y,
+								particle_class_item_data.z
+							);
+						geometry.vertices.push(particle);
+						plot.execEvent("onItemLoad", { item : item_data });
+					}
+					var system = new THREE.PointCloud(geometry, material);
+					plot.scene.add(system);
+				}
+			}
+
+			var item_data_index = parsed_data.length;
+			var item_data_sorted = [];
+
+			while(item_data_index--) {
+				var item_data = parsed_data[item_data_index];
+				var item_data_material = getParticleMaterial(item_data_sorted, item_data);
+				item_data_material.items.push(item_data);
+			}
+
+			do_show_patricles(plot, item_data_sorted);
 		}
 
 		var drawing_func = null;
