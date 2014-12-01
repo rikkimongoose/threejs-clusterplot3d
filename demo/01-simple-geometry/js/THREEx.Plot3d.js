@@ -157,21 +157,6 @@ THREEx.ClusterPlot3d = function(plot_options) {
 	};
 
 	this.init = function() {
-		/*function load_sprite_alignment() {
-			THREE.SpriteAlignment = {};
-			THREE.SpriteAlignment.topLeft = new THREE.Vector2( 1, -1 );
-			THREE.SpriteAlignment.topCenter = new THREE.Vector2( 0, -1 );
-			THREE.SpriteAlignment.topRight = new THREE.Vector2( -1, -1 );
-			THREE.SpriteAlignment.centerLeft = new THREE.Vector2( 1, 0 );
-			THREE.SpriteAlignment.center = new THREE.Vector2( 0, 0 );
-			THREE.SpriteAlignment.centerRight = new THREE.Vector2( -1, 0 );
-			THREE.SpriteAlignment.bottomLeft = new THREE.Vector2( 1, 1 );
-			THREE.SpriteAlignment.bottomCenter = new THREE.Vector2( 0, 1 );
-			THREE.SpriteAlignment.bottomRight = new THREE.Vector2( -1, 1 );
-		}
-		if(typeof THREE.SpriteAlignment == "undefined"){
-			load_sprite_alignment();
-		}*/
 		this.scene = new THREE.Scene();
 		// CAMERA
 		var screen_width = this.container.clientWidth,
@@ -357,7 +342,7 @@ THREEx.ClusterPlot3d = function(plot_options) {
 		this.gridYZ = gridYZ;
 	}
 
-	this.getGeometry = function(item_type, size, position){
+	function getGeometry(item_type, size, position){
 		function getSphereGeometry(radius){
 			return new THREE.SphereGeometry( radius, THREEx.CONST_GEO.SPHERE.SEGMENTS.WIDTH, THREEx.CONST_GEO.SPHERE.SEGMENTS.HEIGHT);
 		}
@@ -381,7 +366,7 @@ THREEx.ClusterPlot3d = function(plot_options) {
 		return null;
 	}
 
-	this.getMaterial = function(item_material, item_color){
+	function getMaterial(item_material, item_color){
 		function getBasicMaterial(properties){
 			return new THREE.MeshBasicMaterial(properties);
 		}
@@ -423,8 +408,8 @@ THREEx.ClusterPlot3d = function(plot_options) {
 			while(item_data_index--) {
 				var item_data = parsed_data[item_data_index];
 
-				var geometry = plot.getGeometry(item_data.type, item_data.size, item_data);
-				var material = plot.getMaterial(item_data.material, item_data.color);
+				var geometry = getGeometry(item_data.type, item_data.size, item_data);
+				var material = getMaterial(item_data.material, item_data.color);
 				var mesh = new THREE.Mesh( geometry, material );
 				mesh.name = item_data.title;
 				mesh.item_data = item_data;
