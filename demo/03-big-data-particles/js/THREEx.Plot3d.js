@@ -116,7 +116,13 @@ THREEx.ClusterPlot3d = function(plot_options) {
 		hint_color : 0xFFFF00,
 		hint_color_border : 0x000000,
 
-		item_view_mode : THREEx.CONST_ITEMS_MODE.GEOMETRY
+		item_view_mode : THREEx.CONST_ITEMS_MODE.GEOMETRY,
+
+		axis_labels : {
+			x : "x",
+			y : "y",
+			z : "z"
+		}
 	};
 
 	this.options = {};
@@ -231,7 +237,6 @@ THREEx.ClusterPlot3d = function(plot_options) {
     	requestAnimationFrame(this.animate.bind(this));
 		this.render();
 		this.update();
-		//this.
 	};
 
 	this.update = function(){
