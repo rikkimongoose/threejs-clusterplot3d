@@ -250,12 +250,12 @@ THREEx.ClusterPlot3d = function(plotOptions) {
 				this.projector.unprojectVector( vector, this.camera );
 				var ray = new THREE.Raycaster( this.camera.position, vector.sub( this.camera.position ).normalize() );
 				// create an array containing all objects in the scene with which the ray intersects
-				var intersects_raw = ray.intersectObjects( this.scene.children, true );
+				var intersectsRaw = ray.intersectObjects( this.scene.children, true );
 				var intersects = [];
 
-				for(var i = 0, l = intersects_raw.length; i < l; i++){
-					if(intersects_raw[i].object.name)
-						intersects.push(intersects_raw[i]);
+				for(var i = 0, l = intersectsRaw.length; i < l; i++){
+					if(intersectsRaw[i].object.name)
+						intersects.push(intersectsRaw[i]);
 				}
 
 				// this.intersected = the object in the scene currently closest to the camera 
@@ -263,24 +263,24 @@ THREEx.ClusterPlot3d = function(plotOptions) {
 				// if there is one (or more) intersections
 				if ( intersects.length )
 				{
-					var inter_index = 0;
-					for(var inter_index = 0, intersects_length = intersects.length; inter_index < intersects_length; inter_index++){
-						var intersect_obj = intersects[inter_index].object;
-						if ( intersect_obj != this.intersected && intersect_obj.name ) 
+					var c = 0;
+					for(var interIndex = 0, l = intersects.length; interIndex < l; interIndex++){
+						var intersectObj = intersects[interIndex].object;
+						if ( intersectObj != this.intersected && intersectObj.name ) 
 						{
 							if (this.intersected && typeof this.intersected.currentHex != 'undefined' && this.intersected.currentHex){
 								this.intersected.material.color.setHex( this.intersected.currentHex );
 							}
 							
 							// store reference to closest object as current intersection object
-							this.intersected = intersect_obj;
+							this.intersected = intersectObj;
 							if(this.options.highlightSelected) {
 								// store color of closest object (for later restoration)
 								this.intersected.currentHex = this.intersected.material.color.getHex();
 								// set a new color for closest object
 								this.intersected.material.color.setHex( this.options.selectedItemColor );
 							}
-							this.execEvent('onHover', { mash_item : this.intersected, item : this.intersected ? this.intersected.itemData : null, mouse : this.mouse });
+							this.execEvent('onPlotHover', { mashItem : this.intersected, item : this.intersected ? this.intersected.itemData : null, mouse : this.mouse });
 							break;	
 						}
 					}
@@ -293,7 +293,7 @@ THREEx.ClusterPlot3d = function(plotOptions) {
 
 					if ( this.intersected ) {
 						this.intersected.material.color.setHex( this.intersected.currentHex );
-						this.execEvent('onHoverOut', { mash_item : this.intersected, item : this.intersected.itemData, mouse : this.mouse });
+						this.execEvent('onPlotHoverOut', { mashItem : this.intersected, item : this.intersected.itemData, mouse : this.mouse });
 					}
 					this.intersected = null;
 				}
@@ -307,7 +307,7 @@ THREEx.ClusterPlot3d = function(plotOptions) {
 		this.renderer.render( this.scene, this.camera );
 	};
 
-	this.grid_options = {
+	this.gridOptions = {
 		xz : {
 			size : this.options.stepsSize,
 			step : this.options.stepsStep
@@ -325,18 +325,18 @@ THREEx.ClusterPlot3d = function(plotOptions) {
 	this.grids = function() {
 		var halfPI = Math.PI/2;
 
-		var gridXZ = new THREE.GridHelper(this.grid_options.xz.size, this.grid_options.xz.step);
+		var gridXZ = new THREE.GridHelper(this.gridOptions.xz.size, this.gridOptions.xz.step);
 		gridXZ.setColors( new THREE.Color(this.options.colorXZCentral), new THREE.Color(this.options.colorXZ) );
 		gridXZ.position.set( this.options.stepsSize, 0, this.options.stepsSize );
 		this.scene.add(gridXZ);
 			
-		var gridXY = new THREE.GridHelper(this.grid_options.xy.size, this.grid_options.xy.step);
+		var gridXY = new THREE.GridHelper(this.gridOptions.xy.size, this.gridOptions.xy.step);
 		gridXY.position.set( this.options.stepsSize, this.options.stepsSize, 0 );
 		gridXY.rotation.x = halfPI;
 		gridXY.setColors( new THREE.Color(this.options.colorXZCentral), new THREE.Color(this.options.colorXY) );
 		this.scene.add(gridXY);
 
-		var gridYZ = new THREE.GridHelper(this.grid_options.yz.size, this.grid_options.yz.step);
+		var gridYZ = new THREE.GridHelper(this.gridOptions.yz.size, this.gridOptions.yz.step);
 		gridYZ.position.set( 0, this.options.stepsSize, this.options.stepsSize );
 		gridYZ.rotation.z = halfPI;
 		gridYZ.setColors( new THREE.Color(this.options.colorYZCentral), new THREE.Color(this.options.colorYZ) );
@@ -368,7 +368,7 @@ THREEx.ClusterPlot3d = function(plotOptions) {
 		return null;
 	}
 
-	function getMaterial(item_material, item_color){
+	function getMaterial(itemMaterial, itemColor){
 		function getBasicMaterial(properties){
 			return new THREE.MeshBasicMaterial(properties);
 		}
@@ -381,16 +381,16 @@ THREEx.ClusterPlot3d = function(plotOptions) {
 			return new THREE.MeshPhongMaterial(properties);
 		}
 
-		switch(item_material)
+		switch(itemMaterial)
 		{
-			case THREEx.PLOT_TYPE.MATERIAL.BASIC  : return getBasicMaterial( { color: item_color } );
-			case THREEx.PLOT_TYPE.MATERIAL.LAMBER : return getLambertMaterial( { color: item_color } );
-			case THREEx.PLOT_TYPE.MATERIAL.PHONG  : return getPhongMaterial( { color: item_color } );
+			case THREEx.PLOT_TYPE.MATERIAL.BASIC  : return getBasicMaterial( { color: itemColor } );
+			case THREEx.PLOT_TYPE.MATERIAL.LAMBER : return getLambertMaterial( { color: itemColor } );
+			case THREEx.PLOT_TYPE.MATERIAL.PHONG  : return getPhongMaterial( { color: itemColor } );
 		}
 		return null;
 	}
 	
-	this.clear_plot = function(){
+	this.clearPlot = function(){
 		while(this.parsedData.length) {
 			var itemData = this.parsedData.pop();
 			if(itemData.mesh)
@@ -400,12 +400,12 @@ THREEx.ClusterPlot3d = function(plotOptions) {
 		}
 	}
 
-	this.draw_plot = function() {
-		function draw_plot_material(plot, parsedData) {
-			var itemData_index = parsedData.length;
+	this.drawPlot = function() {
+		function drawPlotMaterial(plot, parsedData) {
+			var itemDataIndex = parsedData.length;
 
-			while(itemData_index--) {
-				var itemData = parsedData[itemData_index];
+			while(itemDataIndex--) {
+				var itemData = parsedData[itemDataIndex];
 
 				var geometry = getGeometry(itemData.type, itemData.size, itemData);
 				var material = getMaterial(itemData.material, itemData.color);
@@ -432,13 +432,13 @@ THREEx.ClusterPlot3d = function(plotOptions) {
 				itemData.mesh = mesh;
 				plot.scene.add(mesh);
 
-				if(itemData.outline_color && itemData.outline_expand) {
-					var outlineMaterial = new THREE.MeshBasicMaterial( { color: itemData.outline_color, side: THREE.BackSide } );
+				if(itemData.outlineColor && itemData.outlineExpand) {
+					var outlineMaterial = new THREE.MeshBasicMaterial( { color: itemData.outlineColor, side: THREE.BackSide } );
 					var outlineMesh = new THREE.Mesh( geometry, outlineMaterial );
 					outlineMesh.position.x = mesh.position.x;
 					outlineMesh.position.y = mesh.position.y;
 					outlineMesh.position.z = mesh.position.z;
-					outlineMesh.scale.multiplyScalar(itemData.outline_expand);
+					outlineMesh.scale.multiplyScalar(itemData.outlineExpand);
 					itemData.outlineMesh = outlineMesh;
 					plot.scene.add( outlineMesh );
 				} else {
@@ -448,7 +448,7 @@ THREEx.ClusterPlot3d = function(plotOptions) {
 			}
 		}
 
-		function draw_plot_particle(plot, parsedData) {
+		function drawPlotParticle(plot, parsedData) {
 			function createParticleMaterial(itemData){
 			 	return {
 			 		color : itemData.color,
@@ -464,34 +464,34 @@ THREEx.ClusterPlot3d = function(plotOptions) {
 					&& m1.size  == m2.size;
 			}
 
-			function getParticleMaterial(particle_classes, itemData) {
-				var index = particle_classes.length;
+			function getParticleMaterial(particleClasses, itemData) {
+				var index = particleClasses.length;
 				while(index--){
-					var particle_class = particle_classes[index];
-					if(cmpParticleMaterials(particle_class, itemData))
-						return particle_class;
+					var particleClass = particleClasses[index];
+					if(cmpParticleMaterials(particleClass, itemData))
+						return particleClass;
 				}
-				var new_material = createParticleMaterial(itemData);
-				particle_classes.push(new_material);
-				return new_material;
+				var newMaterial = createParticleMaterial(itemData);
+				particleClasses.push(newMaterial);
+				return newMaterial;
 			}
 
-			function do_show_patricles(plot, particle_groups){
-				for(var i = 0, li = particle_groups.length; i < li; i++) {
-					var particle_group = particle_groups[i];
+			function doShowPatricles(plot, particleGroups){
+				for(var i = 0, li = particleGroups.length; i < li; i++) {
+					var particleGroup = particleGroups[i];
 					var geometry = new THREE.Geometry();
 					var material = new THREE.PointCloudMaterial({
-						size : particle_group.size,
-						color : particle_group.color,
+						size : particleGroup.size,
+						color : particleGroup.color,
 						vertexColors : false
 					});
 					
-					for(var j = 0, lj = particle_group.items.length; j < lj; j++) {
-						var particle_group_data = particle_group.items[j];
+					for(var j = 0, lj = particleGroup.items.length; j < lj; j++) {
+						var particleGroupData = particleGroup.items[j];
 						var particle = new THREE.Vector3(
-								particle_group_data.x,
-								particle_group_data.y,
-								particle_group_data.z
+								particleGroupData.x,
+								particleGroupData.y,
+								particleGroupData.z
 							);
 						geometry.vertices.push(particle);
 						plot.execEvent('onItemLoad', { item : particle });
@@ -501,29 +501,29 @@ THREEx.ClusterPlot3d = function(plotOptions) {
 				}
 			}
 
-			var itemData_index = parsedData.length;
-			var particle_groups = [];
+			var itemDataIndex = parsedData.length;
+			var particleGroups = [];
 
-			while(itemData_index--) {
-				var itemData = parsedData[itemData_index];
-				var itemData_material = getParticleMaterial(particle_groups, itemData);
-				itemData_material.items.push(itemData);
+			while(itemDataIndex--) {
+				var itemData = parsedData[itemDataIndex];
+				var itemDataMaterial = getParticleMaterial(particleGroups, itemData);
+				itemDataMaterial.items.push(itemData);
 			}
 
-			do_show_patricles(plot, particle_groups);
+			doShowPatricles(plot, particleGroups);
 		}
 
-		var drawing_func = null;
+		var drawingFunc = null;
 		switch(this.options.itemViewMode)
 		{
 			case THREEx.CONST_ITEMS_MODE.GEOMETRY:
-				 drawing_func = draw_plot_material;
+				 drawingFunc = drawPlotMaterial;
 			break;
 			case THREEx.CONST_ITEMS_MODE.PARTICLE:
-				drawing_func = draw_plot_particle;
+				drawingFunc = drawPlotParticle;
 			break;
 		}
-		drawing_func(this, this.parsedData);
+		drawingFunc(this, this.parsedData);
 		this.execEvent('onItemsLoaded', { items : this.parsedData });
 	}
 
@@ -535,176 +535,176 @@ THREEx.ClusterPlot3d = function(plotOptions) {
 		MATERIAL : 4
 	};
 
-	function makeParseRule(type, is_normalised){
-		return { type : type, func : null, is_normalised : is_normalised}
+	function makeParseRule(type, isNormalised){
+		return { type : type, func : null, isNormalised : isNormalised}
 	}
 
-	this.parse_rules = {
+	this.parseRules = {
 			x : makeParseRule(PARSE_RULES_TYPES.NUMERIC, true),
 			y : makeParseRule(PARSE_RULES_TYPES.NUMERIC, true),
 			z : makeParseRule(PARSE_RULES_TYPES.NUMERIC, true),
 			title : makeParseRule(PARSE_RULES_TYPES.CONST, false),
 			color : makeParseRule(PARSE_RULES_TYPES.COLOR, false),
-			outline_color : makeParseRule(PARSE_RULES_TYPES.COLOR, false),
-			outline_expand : makeParseRule(PARSE_RULES_TYPES.NUMERIC, false),
+			outlineColor : makeParseRule(PARSE_RULES_TYPES.COLOR, false),
+			outlineExpand : makeParseRule(PARSE_RULES_TYPES.NUMERIC, false),
 			material : makeParseRule(PARSE_RULES_TYPES.MATERIAL, false),
 			size : makeParseRule(PARSE_RULES_TYPES.NUMERIC, false),
 			type : makeParseRule(PARSE_RULES_TYPES.FIGURE, false)
 		};
 
-	this.parse_rules_data_columns = [];
+	this.parseRulesDataColumns = [];
 
-	this.prepare_parse_rules = function(rules) {
-		var default_rules_values = {
+	this.prepareParseRules = function(rules) {
+		var defaultRulesValues = {
 			title : null,
 			x : 0,
 			y : 0,
 			z : 0,
 			color : 0xFF0000,
-			outline_color : null,
-			outline_expand : 1.2,
+			outlineColor : null,
+			outlineExpand : 1.2,
 			material : THREEx.PLOT_TYPE.MATERIAL.LAMBER,
 			size : 1,
 			type : THREEx.PLOT_TYPE.ITEM.CUBE
 		};
 
-		var ignored_values = [];
+		var ignoredValues = [];
 
-		var default_rules = {
+		var defaultRules = {
 			title : function(item){ 
-					var item_str = '';
+					var itemStr = '';
 					for(var key in item) {
-						if(ignored_values.indexOf(key) > 0)
+						if(ignoredValues.indexOf(key) > 0)
 							continue;
-						var item_val = item[key];
-						if(typeof item_val == 'underfined')
+						var itemVal = item[key];
+						if(typeof itemVal == 'underfined')
 							continue;
-						item_str += key + ' : ' + (item_val != null ? item_val : 'null' ) + '\n';
+						itemStr += key + ' : ' + (itemVal != null ? itemVal : 'null' ) + '\n';
 					}
-					return item_str;
+					return itemStr;
 				},
-			x : function(item) { return (typeof item[0] != 'undefined') ? item[0] : default_rules_values.x; },
-			y : function(item) { return (typeof item[1] != 'undefined') ? item[1] : default_rules_values.y; },
-			z : function(item) { return (typeof item[2] != 'undefined') ? item[2] : default_rules_values.z; },
-			size : function(item) { return (typeof item[3] != 'undefined') ? item[3] : default_rules_values.size; },
-			color : function() { return default_rules_values.color; },
-			outline_color : function() { return default_rules_values.outline_color; },
-			outline_expand : function() { return default_rules_values.outline_expand; },
-			material : function() { return default_rules_values.material; },
-			type : function() { return default_rules_values.type; }
+			x : function(item) { return (typeof item[0] != 'undefined') ? item[0] : defaultRulesValues.x; },
+			y : function(item) { return (typeof item[1] != 'undefined') ? item[1] : defaultRulesValues.y; },
+			z : function(item) { return (typeof item[2] != 'undefined') ? item[2] : defaultRulesValues.z; },
+			size : function(item) { return (typeof item[3] != 'undefined') ? item[3] : defaultRulesValues.size; },
+			color : function() { return defaultRulesValues.color; },
+			outlineColor : function() { return defaultRulesValues.outlineColor; },
+			outlineExpand : function() { return defaultRulesValues.outlineExpand; },
+			material : function() { return defaultRulesValues.material; },
+			type : function() { return defaultRulesValues.type; }
 		};
 
-		function get_rule_value(rule_key, is_normalised) {
-			if(typeof rules[rule_key] != 'undefined'){
-				if(typeof rules[rule_key] == 'function')
-					return { func: rules[rule_key], is_changed : true };
-				return { func: function(item) { return item[rules[rule_key]]; }, is_changed : true };
+		function getRuleValue(ruleKey, isNormalised) {
+			if(typeof rules[ruleKey] != 'undefined'){
+				if(typeof rules[ruleKey] == 'function')
+					return { func: rules[ruleKey], isChanged : true };
+				return { func: function(item) { return item[rules[ruleKey]]; }, isChanged : true };
 			}
-			var rule_key_const = rule_key + '_const';
-			if(typeof rules[rule_key_const] != 'undefined')
-				return { func : function() { return rules[rule_key_const] }, is_changed : false };
-			if(typeof default_rules[rule_key] != 'undefined')
-				return { func : default_rules[rule_key], is_changed : is_normalised };
+			var ruleKeyConst = ruleKey + '_const';
+			if(typeof rules[ruleKeyConst] != 'undefined')
+				return { func : function() { return rules[ruleKeyConst] }, isChanged : false };
+			if(typeof defaultRules[ruleKey] != 'undefined')
+				return { func : defaultRules[ruleKey], isChanged : isNormalised };
 			return null;
 		}
 
-		for(var rule_key in default_rules) {
-			var rule_value = get_rule_value(rule_key, this.parse_rules[rule_key].is_normalised);
-			this.parse_rules[rule_key].func = rule_value.func;
-			if(rule_value.is_changed)
-				this.parse_rules_data_columns.push(rule_key);
+		for(var ruleKey in defaultRules) {
+			var ruleValue = getRuleValue(ruleKey, this.parseRules[ruleKey].isNormalised);
+			this.parseRules[ruleKey].func = ruleValue.func;
+			if(ruleValue.isChanged)
+				this.parseRulesDataColumns.push(ruleKey);
 		}
 	}
 
-	this.background = function(elem_id){
+	this.background = function(elemId){
 		this.execEvent('onBeforeLoad', { items : this.parsedData });
-		this.id = elem_id;
-		this.element_id = elem_id;
-		this.container = document.getElementById(elem_id);
+		this.id = elemId;
+		this.elementId = elemId;
+		this.container = document.getElementById(elemId);
 		if(!this.container){
-			console.error("Element with id '%s' is not found.", elem_id);
+			console.error("Element with id '%s' is not found.", elemId);
 			return null;
 		}
 		
 		this.init();
-		if(this.options.showGrids){
+		if(this.options.showGrids)
 			this.grids();
-		}
 		this.animate();
 
 		return this.scene;
 	}
 
-	this.normalise_parsedData = function(){
-		function map_to_all(items, col_key, val) {
+	this.normaliseParsedData = function(){
+		function mapToAll(items, columnKey, val) {
 			var i = items.length;
 			while(i--)
-				items[i][col_key] = val;
+				items[i][columnKey] = val;
 		}
 
-		function normalise_numeric(data_to_normalise, key, stepsCount, stepsCountKoeff) {
+		function normaliseNumeric(dataToNormalise, key, stepsCount, stepsCountKoeff) {
 			var maxValue = Number.NEGATIVE_INFINITY;
 			var minValue = Number.POSITIVE_INFINITY;
-			var data_length = data_to_normalise.length;
-			var data_key = data_length;
-			while(data_key--) {
-				var data_item = data_to_normalise[data_key][key];
-				maxValue = Math.max(data_item, maxValue);
-				minValue = Math.min(data_item, minValue);
+			var dataLength = dataToNormalise.length;
+
+			var dataKey = dataLength;
+			while(dataKey--) {
+				var dataItem = dataToNormalise[dataKey][key];
+				maxValue = Math.max(dataItem, maxValue);
+				minValue = Math.min(dataItem, minValue);
 			}
 
 			var koeff = ((maxValue != minValue) ? (stepsCount / (maxValue - minValue)) : stepsCount) * stepsCountKoeff;
-			data_key = data_length;
-			while(data_key--) {
-				var data_item = data_to_normalise[data_key][key];
-				data_item = ((maxValue != minValue) ? (data_item - minValue) : data_item) * koeff;
-				data_to_normalise[data_key][key] = data_item;
+			dataKey = dataLength;
+			while(dataKey--) {
+				var dataItem = dataToNormalise[dataKey][key];
+				dataItem = ((maxValue != minValue) ? (dataItem - minValue) : dataItem) * koeff;
+				dataToNormalise[dataKey][key] = dataItem;
 			}
 		}
 
-		function normalise_color(data_to_normalise, column_key, palette) {
+		function normaliseColor(dataToNormalise, columnKey, palette) {
 			var categories = [];
-			for(var item_key in data_to_normalise){
-				var item_value = data_to_normalise[item_key][column_key];
-				if(categories.indexOf(item_value) < 0)
-					categories.push(item_value);
+			for(var itemKey in dataToNormalise){
+				var itemValue = dataToNormalise[itemKey][columnKey];
+				if(categories.indexOf(itemValue) < 0)
+					categories.push(itemValue);
 			}
 
 			var colors = THREEx.getColorsRange(categories.length);
 
-			for(var item_key in data_to_normalise){
-				var item = data_to_normalise[item_key];
-				item[column_key] = colors[categories.indexOf(item[column_key])];				
+			for(var itemKey in dataToNormalise){
+				var item = dataToNormalise[itemKey];
+				item[columnKey] = colors[categories.indexOf(item[columnKey])];				
 			}
 		}
 
-		function normalise_range(data, col_key, types) {
-			var max_type = types.length,
-				is_overflown = false,
-				category_links = {},
+		function normaliseRange(data, columnKey, types) {
+			var maxType = types.length,
+				isOverflown = false,
+				categoryLinks = {},
 				categories = [],
-				last_one = null;
+				lastOne = null;
 
-			for(var data_key in data) {
-				var data_item = data[data_key];
-				var category_title = data_item[col_key];
-				if(typeof category_links[category_title] == 'undefined') {
-					var num_category =
+			for(var dataKey in data) {
+				var dataItem = data[dataKey];
+				var categoryTitle = dataItem[columnKey];
+				if(typeof categoryLinks[categoryTitle] == 'undefined') {
+					var numCategory =
 					{
-						name : category_title,
-						items : [data_item],
+						name : categoryTitle,
+						items : [dataItem],
 						count : 1
 					};
-					category_links[category_title] = num_category;
-					categories.push(num_category);
-					if(!is_overflown && categories.length > max_type){
-						is_overflown = true;
-						console.warn("There're more variants then categories in column '%s'", col_key);
+					categoryLinks[categoryTitle] = numCategory;
+					categories.push(numCategory);
+					if(!isOverflown && categories.length > maxType){
+						isOverflown = true;
+						console.warn("There're more variants then categories in column '%s'", columnKey);
 					}
 				} else {
-					var num_category = category_links[category_title];
-					num_category.items.push(data_item);
-					num_category.count++;
+					var numCategory = categoryLinks[categoryTitle];
+					numCategory.items.push(dataItem);
+					numCategory.count++;
 				}
 			}
 			categories.sort(function(a, b) {
@@ -716,28 +716,28 @@ THREEx.ClusterPlot3d = function(plotOptions) {
 			});
 			for (var i = 0, len = categories.length; i < len; i++) {
 				var category = categories[i];
-				if(i < max_type)
-					last_one = types[i];
-				map_to_all(category.items, col_key, last_one);
+				if(i < maxType)
+					lastOne = types[i];
+				mapToAll(category.items, columnKey, lastOne);
 			}
 			return categories;
 		}
 
-		for(var rule_key in this.parse_rules_data_columns) {
-			var data_column_key = this.parse_rules_data_columns[rule_key];
-			var rule = this.parse_rules[data_column_key];
+		for(var ruleKey in this.parseRulesDataColumns) {
+			var dataColumnKey = this.parseRulesDataColumns[ruleKey];
+			var rule = this.parseRules[dataColumnKey];
 			switch(rule.type){
 				case PARSE_RULES_TYPES.NUMERIC:
-					normalise_numeric(this.parsedData, data_column_key, this.options.stepsCount, this.options.stepsCountKoeff);
+					normaliseNumeric(this.parsedData, dataColumnKey, this.options.stepsCount, this.options.stepsCountKoeff);
 				break;
 				case PARSE_RULES_TYPES.COLOR:
-					normalise_color(this.parsedData, data_column_key, this.options.palette);
+					normaliseColor(this.parsedData, dataColumnKey, this.options.palette);
 				break;
 				case PARSE_RULES_TYPES.FIGURE:
-					normalise_range(this.parsedData, data_column_key, [THREEx.PLOT_TYPE.ITEM.SPHERE, THREEx.PLOT_TYPE.ITEM.CUBE]);
+					normaliseRange(this.parsedData, dataColumnKey, [THREEx.PLOT_TYPE.ITEM.SPHERE, THREEx.PLOT_TYPE.ITEM.CUBE]);
 				break;
 				case PARSE_RULES_TYPES.MATERIAL:
-					normalise_range(this.parsedData, data_column_key, [THREEx.PLOT_TYPE.MATERIAL.LAMBER, THREEx.PLOT_TYPE.MATERIAL.PHONG, THREEx.PLOT_TYPE.MATERIAL.BASIC]);
+					normaliseRange(this.parsedData, dataColumnKey, [THREEx.PLOT_TYPE.MATERIAL.LAMBER, THREEx.PLOT_TYPE.MATERIAL.PHONG, THREEx.PLOT_TYPE.MATERIAL.BASIC]);
 				break;
 				case PARSE_RULES_TYPES.CONST:
 				default:
@@ -747,98 +747,98 @@ THREEx.ClusterPlot3d = function(plotOptions) {
 		}
 	}
 
-	this.parse_data = function(data) {
-		this.source_data = data;
-		this.raw_parsedData = [];
+	this.parseData = function(data) {
+		this.sourceData = data;
+		this.rawParsedData = [];
 		this.parsedData = [];
 
 		for(var i = 0, len = data.length; i < len; i++){
-			var source_data_item = this.source_data[i];
-			var parsedData_item = {data_item : source_data_item};
-			for(var rule_key in this.parse_rules) {
-				var rule = this.parse_rules[rule_key];
-				parsedData_item[rule_key] = rule.func(source_data_item);
+			var sourceDataItem = this.sourceData[i];
+			var parsedDataItem = {dataItem : sourceDataItem};
+			for(var ruleKey in this.parseRules) {
+				var rule = this.parseRules[ruleKey];
+				parsedDataItem[ruleKey] = rule.func(sourceDataItem);
 			}
-			this.raw_parsedData.push(parsedData_item);
-			this.parsedData.push(parsedData_item);
+			this.rawParsedData.push(parsedDataItem);
+			this.parsedData.push(parsedDataItem);
 		}
 		if(this.options.stratch){
-			this.normalise_parsedData(this.parsedData);
+			this.normaliseParsedData(this.parsedData);
 		}
 	}
 
 	this.onItemLoad = [];
 	this.onItemsLoaded = [];
 	this.onBeforeLoad = [];
-	this.onHover = [];
-	this.onHoverOut = [];
+	this.onPlotHover = [];
+	this.onPlotHoverOut = [];
 };
 
-THREEx.ClusterPlot3d.prototype.doDrawBackground = function(elem_id) {
-	this.background(elem_id);
+THREEx.ClusterPlot3d.prototype.doDrawBackground = function(elemId) {
+	this.background(elemId);
 	return this;
 };
 
 THREEx.ClusterPlot3d.prototype.doDrawData = function(){
-	this.draw_plot();
+	this.drawPlot();
 	return this;
 };
 
 THREEx.ClusterPlot3d.prototype.doClear = function(){
-	this.clear_plot();
+	this.clearPlot();
 	return this;
 };
 
-THREEx.ClusterPlot3d.prototype.doParseData = function(data, data_parse_config) {
-	this.prepare_parse_rules(data_parse_config);
-	this.parse_data(data);
+THREEx.ClusterPlot3d.prototype.doParseData = function(data, dataParseConfig) {
+	this.prepareParseRules(dataParseConfig);
+	this.parseData(data);
 	return this
 };
 
-THREEx.ClusterPlot3d.prototype.execEvent = function(event_title, e){
-	var i = this[event_title].length;
+THREEx.ClusterPlot3d.prototype.execEvent = function(eventTitle, e){
+	var i = this[eventTitle].length;
 	while(i--){
-		var func = this[event_title][i]
+		var func = this[eventTitle][i]
 		if(typeof func == 'function')
 			func(this, e);
 	}
 	return this;
 };
 
-THREEx.ClusterPlot3d.prototype.addEvent = function(event_title, func){
+THREEx.ClusterPlot3d.prototype.addEvent = function(eventTitle, func){
 	if(typeof func != 'function')
 		return this;
 
-	if(typeof this[event_title] == 'undefined'){
-		console.error("Plot 3D doesn't support event '%s'.", event_title);
+	if(typeof this[eventTitle] == 'undefined'){
+		console.error("Plot 3D doesn't support event '%s'.", eventTitle);
 		return this;
 	}
 
-	this[event_title].push(func);
+	this[eventTitle].push(func);
 	return this;
 };
 
-THREEx.getClusterPlotById = function(plot_id) {
+THREEx.getClusterPlotById = function(plotId) {
 	if(typeof THREEx._plots3d == 'undefined')
 		return null;
-	var plot_index = THREEx._plots3d.length;
-	while(plot_index--){
-		var plot_item = THREEx._plots3d[plot_index];
-		if(typeof plot_index.id != 'undefined' && plot_index.id == plot_id)
-			return plot_index;
+	var plotIndex = THREEx._plots3d.length;
+	while(plotIndex--){
+		var plotItem = THREEx._plots3d[plotIndex];
+		if(typeof plotIndex.id != 'undefined' && plotIndex.id == plotId)
+			return plotItem;
 	}
 	return null;
 };
 
-THREEx.doPlot3d = function(container_id, data, data_options, plotOptions, on_item_load, on_items_load, on_before_load, on_hover, on_hover_out){
+THREEx.doPlot3d = function(containerId, data, dataOptions, plotOptions, onItemLoad, onItemsLoad, onBeforeLoad, onPlotHover, onPlotHoverOut){
 	var cluster3d = new THREEx.ClusterPlot3d(plotOptions)
-		.addEvent('onItemLoad', on_item_load)
-		.addEvent('onItemsLoaded', on_items_load)
-		.addEvent('onBeforeLoad', on_before_load)
-		.addEvent('onHover', on_hover)
-		.addEvent('onHoverOut', on_hover_out)
-		.doDrawBackground(container_id)
-		.doParseData(data, data_options)
+		.addEvent('onItemLoad', onItemLoad)
+		.addEvent('onItemsLoaded', onItemsLoad)
+		.addEvent('onBeforeLoad', onBeforeLoad)
+		.addEvent('onPlotHover', onPlotHover)
+		.addEvent('onPlotHoverOut', onPlotHoverOut)
+		.doDrawBackground(containerId)
+		.doParseData(data, dataOptions)
 		.doDrawData();
 
 	return cluster3d;

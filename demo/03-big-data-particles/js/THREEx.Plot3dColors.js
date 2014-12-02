@@ -41,8 +41,8 @@ THREEx.getColorsRange = function(n, palette) {
 		var output = [];
 
 		var step = (to - from) / (length - 1);
-		for(var from_index = from; from_index <= to; from_index += step)
-			output.push(from_index);
+		for(var fromIndex = from; fromIndex <= to; fromIndex += step)
+			output.push(fromIndex);
 		return output;
 	};
 
@@ -54,11 +54,11 @@ THREEx.getColorsRange = function(n, palette) {
 		return { r : r, g : g, b : b};
 	};
 
-	function rgbtonum(rgb) {
+	function rgbToNum(rgb) {
 		return rgb.r * 0x10000  + rgb.g * 0x100 + rgb.b;
 	}
 
-	function hsltorgb(hsl) {
+	function hslToRgb(hsl) {
 		var r, g, b;
 		var h = bound01(hsl.h, 360),
 			s = bound01(hsl.s, 100),
@@ -67,7 +67,7 @@ THREEx.getColorsRange = function(n, palette) {
 	    if(s == 0){
 	        r = g = b = l; // achromatic
 	    }else{
-	        function hue2rgb(p, q, t){
+	        function hueToRgb(p, q, t){
 	            if(t < 0) t += 1;
 	            if(t > 1) t -= 1;
 	            if(t < 1/6) return p + (q - p) * 6 * t;
@@ -78,15 +78,15 @@ THREEx.getColorsRange = function(n, palette) {
 
 	        var q = l < 0.5 ? l * (1 + s) : l + s - l * s;
 	        var p = 2 * l - q;
-	        r = hue2rgb(p, q, h + 1/3);
-	        g = hue2rgb(p, q, h);
-	        b = hue2rgb(p, q, h - 1/3);
+	        r = hueToRgb(p, q, h + 1/3);
+	        g = hueToRgb(p, q, h);
+	        b = hueToRgb(p, q, h - 1/3);
 	    }
     	return rgb(Math.round(r * 255), Math.round(g * 255), Math.round(b * 255) );
 	}
 
-	function hsltonum(hcl) {
-		return rgbtonum(hsltorgb(hcl));
+	function hslToNum(hcl) {
+		return rgbToNum(hslToRgb(hcl));
 	}
 
 	function hslMaxColorsCheck(n) {
@@ -105,12 +105,12 @@ THREEx.getColorsRange = function(n, palette) {
 			saturation = 100,
 			luminance = 50;
 
-		var colors_result = [];
+		var colorsResult = [];
 
 		for(var i = 0, len = hue.length; i < len; i++)
-			colors_result.push(hsltonum(hsl(hue[i], saturation, luminance)));
+			colorsResult.push(hslToNum(hsl(hue[i], saturation, luminance)));
 
-		return colors_result;
+		return colorsResult;
 	}
 
 	function semaphorePalette(n) {
@@ -120,12 +120,12 @@ THREEx.getColorsRange = function(n, palette) {
 			saturation = 100,
 			luminance = 50;
 
-		var colors_result = [];
+		var colorsResult = [];
 
 		for(var i = 0, len = hue.length; i < len; i++)
-			colors_result.push(hsltonum(hsl(hue[i], saturation, luminance)));
+			colorsResult.push(hslToNum(hsl(hue[i], saturation, luminance)));
 
-		return colors_result;
+		return colorsResult;
 	}
 
 	function icePalette(n) {
@@ -135,12 +135,12 @@ THREEx.getColorsRange = function(n, palette) {
 			saturation = 100,
 			luminance = 50;
 
-		var colors_result = [];
+		var colorsResult = [];
 
 		for(var i = 0, len = hue.length; i < len; i++)
-			colors_result.push(hsltonum(hsl(hue[i], saturation, luminance)));
+			colorsResult.push(hslToNum(hsl(hue[i], saturation, luminance)));
 
-		return colors_result;
+		return colorsResult;
 	}
 
 	function hotPalette(n) {
@@ -150,12 +150,12 @@ THREEx.getColorsRange = function(n, palette) {
 			saturation = 100,
 			luminance = 50;
 
-		var colors_result = [];
+		var colorsResult = [];
 
 		for(var i = 0, len = hue.length; i < len; i++)
-			colors_result.push(hsltonum(hsl(hue[i], saturation, luminance)));
+			colorsResult.push(hslToNum(hsl(hue[i], saturation, luminance)));
 
-		return colors_result;
+		return colorsResult;
 	}
 
 	switch(palette)

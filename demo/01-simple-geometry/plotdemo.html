@@ -30,19 +30,19 @@
 	<div id="ThreeJS" style="z-index: 2; left:0px; top:0px; width: 100%; height:100%;"></div>
 	<script>
 		$(function() {
-			var source_data = [
+			var sourceData = [
 				[0,0,0,5, "color1"],
 				[10,10,10,5, "color2"],
 				[20, 20, 20, 5, "color3"]
 			];
-			var source_data_len = source_data.length;
+			var sourceDataLen = sourceData.length;
 			var index = 1;
 			var plot = THREEx.doPlot3d("ThreeJS",
-				source_data,
+				sourceData,
 				{ color : 4, type_const : THREEx.PLOT_TYPE.ITEM.SPHERE },
 				{ },
 				function(o, e) {
-					$('#ThreeJSBackground-Text').html('Loading ' + index + ' of ' + source_data_len);
+					$('#ThreeJSBackground-Text').html('Loading ' + index + ' of ' + sourceDataLen);
 					index++;
 				},
 				function(o, e) {

@@ -30,7 +30,7 @@
 	<div id="ThreeJS" style="z-index: 2; left:0px; top:0px; width: 100%; height:100%;"></div>
 	<script>
 		$(function() {
-			var source_data = [
+			var sourceData = [
 			[4, 59, 1],
 			[4, 50, 1],
 			[1, 40, 1],
@@ -11723,14 +11723,14 @@
 			[111, 0, 0],
 			];
 			var start = new Date();
-			var source_data_len = source_data.length;
+			var sourceDataLen = sourceData.length;
 			var index = 1;
 			var plot = THREEx.doPlot3d("ThreeJS",
-				source_data,
+				sourceData,
 				{ color: 2, material_const : THREEx.PLOT_TYPE.MATERIAL.BASIC },
-				{ color_bg_box : 0x000000 },
+				{ color_BackgroundBox : 0x000000 },
 				function(o, e) {
-					$('#ThreeJSBackground-Text').html('Loading ' + index + ' of ' + source_data_len);
+					$('#ThreeJSBackground-Text').html('Loading ' + index + ' of ' + sourceDataLen);
 					index++;
 				},
 				function(o, e) {
