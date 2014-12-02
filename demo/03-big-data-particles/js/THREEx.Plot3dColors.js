@@ -19,7 +19,7 @@ THREEx.COLOR_PALETTE_TYPE = {
 	HOT : 4
 };
 THREEx.getColorsRange = function(n, palette) {
-	if(typeof palette == "undefined" || !palette)
+	if(typeof palette == 'undefined' || !palette)
 		palette = THREEx.COLOR_PALETTE_TYPE.HSL;
 
 	function isOnePointZero(n) {
@@ -27,9 +27,8 @@ THREEx.getColorsRange = function(n, palette) {
 	}
 
 	function bound01(n, max) {
-    	if ((Math.abs(n - max) < 0.000001)) {
+    	if ((Math.abs(n - max) < 0.000001))
         	return 1;
-    	}
 
     	return (n % max) / parseFloat(max);
 	}
@@ -42,8 +41,8 @@ THREEx.getColorsRange = function(n, palette) {
 		var output = [];
 
 		var step = (to - from) / (length - 1);
-		for(; from <= to; from += step)
-			output.push(from);
+		for(var from_index = from; from_index <= to; from_index += step)
+			output.push(from_index);
 		return output;
 	};
 
@@ -90,9 +89,15 @@ THREEx.getColorsRange = function(n, palette) {
 		return rgbtonum(hsltorgb(hcl));
 	}
 
+	function hslMaxColorsCheck(n) {
+		var is_more = (n > 180);
+		if(is_more)
+			console.warn('HSL palette allows only 180 colors. With %s categories some of categories will have same color', n);
+		return is_more;
+	}
+
 	function hslPalette(n) {
-		if(n > 180)
-			console.warn('HSL palette allows only 180 colors. With %s categories some of categories will have same color', n)
+		hslMaxColorsCheck(n);
 
 		var hue_from = 0,
 			hue_to = 200,
@@ -109,8 +114,7 @@ THREEx.getColorsRange = function(n, palette) {
 	}
 
 	function semaphorePalette(n) {
-		if(n > 180)
-			console.warn('HSL palette allows only 180 colors. With %s categories some of categories will have same color', n)
+		hslMaxColorsCheck(n);
 
 		var hue = seq(0, 120, n),
 			saturation = 100,
@@ -125,8 +129,7 @@ THREEx.getColorsRange = function(n, palette) {
 	}
 
 	function icePalette(n) {
-		if(n > 180)
-			console.warn('HSL palette allows only 180 colors. With %s categories some of categories will have same color', n)
+		hslMaxColorsCheck(n);
 
 		var hue = seq(120, 240, n),
 			saturation = 100,
@@ -141,8 +144,7 @@ THREEx.getColorsRange = function(n, palette) {
 	}
 
 	function hotPalette(n) {
-		if(n > 180)
-			console.warn('HSL palette allows only 180 colors. With %s categories some of categories will have same color', n)
+		hslMaxColorsCheck(n);
 
 		var hue = seq(0, 60, n),
 			saturation = 100,
@@ -158,15 +160,10 @@ THREEx.getColorsRange = function(n, palette) {
 
 	switch(palette)
 	{
-		case THREEx.COLOR_PALETTE_TYPE.HSL:
-			return hslPalette(n);
-		case THREEx.COLOR_PALETTE_TYPE.SEMAPHORE:
-			return semaphorePalette(n);
-		case THREEx.COLOR_PALETTE_TYPE.ICE:
-			return icePalette(n);
-		case THREEx.COLOR_PALETTE_TYPE.HOT:
-			return hotPalette(n);
-		default:
-			return hslPalette(n);
+		case THREEx.COLOR_PALETTE_TYPE.HSL       : return hslPalette(n);
+		case THREEx.COLOR_PALETTE_TYPE.SEMAPHORE : return semaphorePalette(n);
+		case THREEx.COLOR_PALETTE_TYPE.ICE       : return icePalette(n);
+		case THREEx.COLOR_PALETTE_TYPE.HOT       : return hotPalette(n);
+		default                                  : return hslPalette(n);
 	}
 };
