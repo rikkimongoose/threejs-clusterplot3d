@@ -116,7 +116,13 @@ THREEx.ClusterPlot3d = function(plot_options) {
 		hint_color : 0xFFFF00,
 		hint_color_border : 0x000000,
 
-		item_view_mode : THREEx.CONST_ITEMS_MODE.GEOMETRY
+		item_view_mode : THREEx.CONST_ITEMS_MODE.GEOMETRY,
+
+		axis_labels : {
+			x : "x",
+			y : "y",
+			z : "z"
+		}
 	};
 
 	this.options = {};
@@ -231,7 +237,6 @@ THREEx.ClusterPlot3d = function(plot_options) {
     	requestAnimationFrame(this.animate.bind(this));
 		this.render();
 		this.update();
-		//this.
 	};
 
 	this.update = function(){
@@ -444,7 +449,6 @@ THREEx.ClusterPlot3d = function(plot_options) {
 		}
 
 		function draw_plot_particle(plot, parsed_data) {
-
 			function createParticleMaterial(item_data){
 			 	return {
 			 		color : item_data.color,
@@ -472,25 +476,25 @@ THREEx.ClusterPlot3d = function(plot_options) {
 				return new_material;
 			}
 
-			function do_show_patricles(plot, item_data_sorted){
-				for(var i = 0, li = item_data_sorted.length; i < li; i++) {
-					var particle_class = item_data_sorted[i];
+			function do_show_patricles(plot, particle_groups){
+				for(var i = 0, li = particle_groups.length; i < li; i++) {
+					var particle_group = particle_groups[i];
 					var geometry = new THREE.Geometry();
 					var material = new THREE.PointCloudMaterial({
-						size : particle_class.size,
-						color : particle_class.color,
+						size : particle_group.size,
+						color : particle_group.color,
 						vertexColors : false
 					});
 					
-					for(var j = 0, lj = particle_class.items.length; j < lj; j++) {
-						var particle_class_item_data = particle_class.items[j];
+					for(var j = 0, lj = particle_group.items.length; j < lj; j++) {
+						var particle_group_data = particle_group.items[j];
 						var particle = new THREE.Vector3(
-								particle_class_item_data.x,
-								particle_class_item_data.y,
-								particle_class_item_data.z
+								particle_group_data.x,
+								particle_group_data.y,
+								particle_group_data.z
 							);
 						geometry.vertices.push(particle);
-						plot.execEvent("onItemLoad", { item : item_data });
+						plot.execEvent("onItemLoad", { item : particle });
 					}
 					var system = new THREE.PointCloud(geometry, material);
 					plot.scene.add(system);
@@ -498,15 +502,15 @@ THREEx.ClusterPlot3d = function(plot_options) {
 			}
 
 			var item_data_index = parsed_data.length;
-			var item_data_sorted = [];
+			var particle_groups = [];
 
 			while(item_data_index--) {
 				var item_data = parsed_data[item_data_index];
-				var item_data_material = getParticleMaterial(item_data_sorted, item_data);
+				var item_data_material = getParticleMaterial(particle_groups, item_data);
 				item_data_material.items.push(item_data);
 			}
 
-			do_show_patricles(plot, item_data_sorted);
+			do_show_patricles(plot, particle_groups);
 		}
 
 		var drawing_func = null;
