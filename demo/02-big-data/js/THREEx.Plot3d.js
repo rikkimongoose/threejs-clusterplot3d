@@ -92,7 +92,7 @@ THREEx.ClusterPlot3d = function(plotOptions) {
 		colorXZ : 0x006600,
 		colorXZCentral : 0x00ff00,
 		colorXY : 0x000066,
-		colorXZCentral : 0x0000ff,
+		colorXYCentral : 0x0000ff,
 		colorYZ : 0x660000,
 		colorYZCentral : 0xff0000,
 
@@ -333,7 +333,7 @@ THREEx.ClusterPlot3d = function(plotOptions) {
 		var gridXY = new THREE.GridHelper(this.gridOptions.xy.size, this.gridOptions.xy.step);
 		gridXY.position.set( this.options.stepsSize, this.options.stepsSize, 0 );
 		gridXY.rotation.x = halfPI;
-		gridXY.setColors( new THREE.Color(this.options.colorXZCentral), new THREE.Color(this.options.colorXY) );
+		gridXY.setColors( new THREE.Color(this.options.colorXYCentral), new THREE.Color(this.options.colorXY) );
 		this.scene.add(gridXY);
 
 		var gridYZ = new THREE.GridHelper(this.gridOptions.yz.size, this.gridOptions.yz.step);
