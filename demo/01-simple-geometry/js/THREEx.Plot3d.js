@@ -363,17 +363,28 @@ THREEx.ClusterPlot3d = function(plotOptions) {
 		this.gridXY = gridXY;
 		this.gridYZ = gridYZ;
 
-		if(this.options.showAxisLabels) {
-		    this.scene.add(this.getAxisLabel(AXIS_TYPE.X));
-		    this.scene.add(this.getAxisLabel(AXIS_TYPE.Y));
-		    this.scene.add(this.getAxisLabel(AXIS_TYPE.Z));
-		}
-		if(this.options.showAxisNumbers){
-		    this.scene.add(this.getAxisNumbers(AXIS_TYPE.X));
-		    this.scene.add(this.getAxisNumbers(AXIS_TYPE.Y));
-		    this.scene.add(this.getAxisNumbers(AXIS_TYPE.Z));
-		}
+		var axis_types = [ AXIS_TYPE.X, AXIS_TYPE.Y, AXIS_TYPE.Z];
+		if(this.options.showAxisLabels)
+			for(var axit_type_index in axis_types)
+				this.createAxisLabel(axis_types[axit_type_index]);
+		if(this.options.showAxisNumbers)
+			for(var axit_type_index in axis_types)
+				this.createAxisNumberLabel(axis_types[axit_type_index]);
 	};
+
+	this.createAxisLabel = function(axis_type){
+		var textMesh = this.getAxisLabel(axis_type);
+		this.scene.add(textMesh);
+	}
+
+
+	this.createAxisNumberLabel = function(axis_type){
+	    var gridProperties = this.getGridProperties(axis_type);
+		for(var pos = 0; pos <= gridProperties.size; pos += gridProperties.step) {
+			var textMesh = this.getAxisNumber(axis_type, pos, pos);
+			this.scene.add(textMesh);
+		}
+	}
 
 	this.getAxisLabel = function(axis_type){
 		function getAxisLabelTitle(axis_type){
@@ -435,20 +446,20 @@ THREEx.ClusterPlot3d = function(plotOptions) {
 	function setAxisMeshPosition(text_mesh, axis_type, grid_size, text_bound){
     	switch(axis_type){
     		case AXIS_TYPE.X:
-	    		text_mesh.position.set(grid_size + text_bound.Width / 2, 0, 0);
+	    		text_mesh.position.set(grid_size + 10, 0, 0);
     		break;
     		case AXIS_TYPE.Y:
-	    		text_mesh.position.set(0, grid_size + text_bound.Width / 2, text_bound.Width / 2);
+	    		text_mesh.position.set(0, grid_size + text_bound.Height / 2, text_bound.Width  / 2);
     			text_mesh.rotation.y = Math.PI / 4;
     		break;
     		case AXIS_TYPE.Z:
-	    		text_mesh.position.set(0, 0, grid_size + text_bound.Width);
+	    		text_mesh.position.set(0, 0, grid_size + text_bound.Width + 10);
     			text_mesh.rotation.y = Math.PI / 2;
     		break;
     	}
 	}
 
-	this.getAxisNumbers = function(axis_type){
+	this.getAxisNumber = function(axis_type, pos, value_text){
 	    var materialFront = new THREE.MeshBasicMaterial({
 	        color: 0xffffff
 	    });
@@ -457,7 +468,7 @@ THREEx.ClusterPlot3d = function(plotOptions) {
 	    });
 	    var materialArray = [materialFront, materialSide];
 
-	    var textGeom = new THREE.TextGeometry("1", {
+	    var textGeom = new THREE.TextGeometry(value_text, {
 	        size : 5,
 	        height: 4,
 	        curveSegments: 0,
@@ -476,7 +487,7 @@ THREEx.ClusterPlot3d = function(plotOptions) {
 	    var textMesh = new THREE.Mesh(textGeom, textMaterial);
 	    var textBound = getTextBound(textGeom);
 	    var gridProperties = this.getGridProperties(axis_type);
-	    setAxisMeshPosition(textMesh, axis_type, gridProperties.step, textBound);
+	    setAxisMeshPosition(textMesh, axis_type, pos, textBound);
 	    return textMesh;
 	}	
 
