@@ -76,6 +76,14 @@ THREEx.CONST_ITEMS_MODE =
 		PARTICLE : 1
 	};
 
+THREEx.FONT = {
+		gentilis : "gentilis",
+		helvetiker : "helvetiker",
+		optimer : "optimer",
+		droid_sans : "droid sans",
+		droid_serif : "droid serif"
+	};
+
 THREEx.ClusterPlot3d = function(plotOptions) {
 	this.keyboard = new THREEx.KeyboardState();
 	this.clock = new THREE.Clock
@@ -119,13 +127,20 @@ THREEx.ClusterPlot3d = function(plotOptions) {
 		itemViewMode : THREEx.CONST_ITEMS_MODE.GEOMETRY,
 
 		showAxisLabels : true,
-		showAxisNumbers : true,
 
-		axisLabels : {
-			x : 'x',
-			y : 'y',
-			z : 'z'
-		}
+		axisLabelX : 'x',
+		axisLabelY : 'y',
+		axisLabelZ : 'z',
+
+		axisLabelFont : THREEx.FONT.helvetiker,
+		axisLabelCurveSegments : 0,
+		axisLabelFrontColor : 0xffffff,
+		axisLabelSideColor : 0x000000,
+		axisLabelSize : 18,
+		axisLabelHeight : 4,
+		axisLabelBevelEnabled : true,
+		axisLabelBevelSize : 2,
+		axisLabelBevelThickness : 1
 	};
 
 	this.options = {};
@@ -331,14 +346,6 @@ THREEx.ClusterPlot3d = function(plotOptions) {
 		Z : 3
 	};
 
-	var LABEL_FONT = {
-		gentilis : "gentilis",
-		helvetiker : "helvetiker",
-		optimer : "optimer",
-		droid_sans : "droid sans",
-		droid_serif : "droid serif"
-	};
-
 	this.grids = function() {
 		var halfPI = Math.PI/2;
 
@@ -388,32 +395,32 @@ THREEx.ClusterPlot3d = function(plotOptions) {
 			this.scene.add(textMesh);
 		}
 	}
+	
+	this.getAxisLabelTitle = function(axis_type){
+	    switch(axis_type){
+	    	case AXIS_TYPE.X : return this.options.axisLabelX;
+	    	case AXIS_TYPE.Y : return this.options.axisLabelY;
+	    	case AXIS_TYPE.Z : return this.options.axisLabelZ;
+	    }
+	    return "";
+	}
 
 	this.getAxisLabel = function(axis_type){
-		function getAxisLabelTitle(axis_type){
-	    	switch(axis_type){
-	    		case AXIS_TYPE.X : return "x";
-	    		case AXIS_TYPE.Y : return "y";
-	    		case AXIS_TYPE.Z : return "z";
-	    	}
-	    	return "";
-		}
 	    var materialFront = new THREE.MeshBasicMaterial({
-	        color: 0xffffff
+	        color: this.options.axisLabelFrontColor
 	    });
 	    var materialSide = new THREE.MeshBasicMaterial({
-	        color: 0x000000
+	        color: this.options.axisLabelSideColor
 	    });
 	    var materialArray = [materialFront, materialSide];
-
-	    var textGeom = new THREE.TextGeometry(getAxisLabelTitle(axis_type), {
-	        size: 18,
-	        height: 4,
-	        curveSegments: 0,
-	        font: 'helvetiker',
-	        bevelThickness: 1,
-	        bevelSize: 2,
-	        bevelEnabled: true,
+	    var textGeom = new THREE.TextGeometry(this.getAxisLabelTitle(axis_type), {
+	        size: this.options.axisLabelSize,
+	        height: this.options.axisLabelHeight,
+	        curveSegments: this.options.axisLabelCurveSegments,
+	        font: this.options.axisLabelFont,
+	        bevelThickness: this.options.axisLabelBevelThickness,
+	        bevelSize: this.options.axisLabelBevelSize,
+	        bevelEnabled: this.options.axisLabelBevelEnabled,
 	        material: 0,
 	        extrudeMaterial: 1
 	    });
