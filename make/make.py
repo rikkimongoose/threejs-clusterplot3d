@@ -1,5 +1,4 @@
-import os.path
-import sys
+import os.path, sys, fnmatch, shutil
 
 def show_msg(text):
 	sys.stdout.write(text)
@@ -9,6 +8,15 @@ def show_err(text):
 
 def do_read():
 	return sys.stdin.read()
+
+def update_demos(js_file_path):
+	demo_folder = "../demo"
+	js_file_name = os.path.basename(js_file_path)
+	for root, dirnames, filenames in os.walk(demo_folder):
+	    for filename in fnmatch.filter(filenames, js_file_name):
+	    	demo_js_filename = os.path.join(root, filename)
+	    	print "replacing %s" % (demo_js_filename)
+	    	shutil.copy2(js_file_path, demo_js_filename)
 
 def combine_files():
 	js_files = [
@@ -46,6 +54,7 @@ def combine_files():
 		show_msg("'%s' is loaded\n" % js_file_name)
 	with open(output_file, 'w') as js_output: js_output.write(js_text)
 	show_msg("Combined file is saved to '%s'\n" % output_file)
+	update_demos(output_file)
 
 def get_git_comment():
 	max_attempts = 5
