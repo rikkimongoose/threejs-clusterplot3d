@@ -714,7 +714,7 @@ THREEx.ClusterPlot3d = function(plotOptions) {
 			x : 0,
 			y : 0,
 			z : 0,
-			color : 0xFF0000,
+			color : 0xff0000,
 			outlineColor : null,
 			outlineExpand : 1.2,
 			material : THREEx.PLOT_TYPE.MATERIAL.LAMBER,
