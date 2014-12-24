@@ -76,6 +76,14 @@ THREEx.CONST_ITEMS_MODE =
 		PARTICLE : 1
 	};
 
+THREEx.FONT = {
+		gentilis : "gentilis",
+		helvetiker : "helvetiker",
+		optimer : "optimer",
+		droid_sans : "droid sans",
+		droid_serif : "droid serif"
+	};
+
 THREEx.ClusterPlot3d = function(plotOptions) {
 	this.keyboard = new THREEx.KeyboardState();
 	this.clock = new THREE.Clock
@@ -118,11 +126,21 @@ THREEx.ClusterPlot3d = function(plotOptions) {
 
 		itemViewMode : THREEx.CONST_ITEMS_MODE.GEOMETRY,
 
-		axisLabels : {
-			x : 'x',
-			y : 'y',
-			z : 'z'
-		}
+		showAxisLabels : true,
+
+		axisLabelX : 'x',
+		axisLabelY : 'y',
+		axisLabelZ : 'z',
+
+		axisLabelFont : THREEx.FONT.helvetiker,
+		axisLabelCurveSegments : 0,
+		axisLabelFrontColor : 0xffffff,
+		axisLabelSideColor : 0x000000,
+		axisLabelSize : 18,
+		axisLabelHeight : 4,
+		axisLabelBevelEnabled : true,
+		axisLabelBevelSize : 2,
+		axisLabelBevelThickness : 1
 	};
 
 	this.options = {};
@@ -322,6 +340,12 @@ THREEx.ClusterPlot3d = function(plotOptions) {
 		}
 	};
 
+	var AXIS_TYPE = {
+		X : 1,
+		Y : 2,
+		Z : 3
+	};
+
 	this.grids = function() {
 		var halfPI = Math.PI/2;
 
@@ -345,7 +369,137 @@ THREEx.ClusterPlot3d = function(plotOptions) {
 		this.gridXZ = gridXZ;
 		this.gridXY = gridXY;
 		this.gridYZ = gridYZ;
+
+		var axis_types = [ AXIS_TYPE.X, AXIS_TYPE.Y, AXIS_TYPE.Z];
+		if(this.options.showAxisLabels)
+			for(var axit_type_index in axis_types)
+				this.createAxisLabel(axis_types[axit_type_index]);
+		/* Temporary removed. Will be in next versions.
+		
+		if(this.options.showAxisNumbers)
+			for(var axit_type_index in axis_types)
+				this.createAxisNumberLabel(axis_types[axit_type_index]);
+		*/
+	};
+
+	this.createAxisLabel = function(axis_type){
+		var textMesh = this.getAxisLabel(axis_type);
+		this.scene.add(textMesh);
 	}
+
+
+	this.createAxisNumberLabel = function(axis_type){
+	    var gridProperties = this.getGridProperties(axis_type);
+		for(var pos = 0; pos <= gridProperties.size; pos += gridProperties.step) {
+			var textMesh = this.getAxisNumber(axis_type, pos, pos);
+			this.scene.add(textMesh);
+		}
+	}
+	
+	this.getAxisLabelTitle = function(axis_type){
+	    switch(axis_type){
+	    	case AXIS_TYPE.X : return this.options.axisLabelX;
+	    	case AXIS_TYPE.Y : return this.options.axisLabelY;
+	    	case AXIS_TYPE.Z : return this.options.axisLabelZ;
+	    }
+	    return "";
+	}
+
+	this.getAxisLabel = function(axis_type){
+	    var materialFront = new THREE.MeshBasicMaterial({
+	        color: this.options.axisLabelFrontColor
+	    });
+	    var materialSide = new THREE.MeshBasicMaterial({
+	        color: this.options.axisLabelSideColor
+	    });
+	    var materialArray = [materialFront, materialSide];
+	    var textGeom = new THREE.TextGeometry(this.getAxisLabelTitle(axis_type), {
+	        size: this.options.axisLabelSize,
+	        height: this.options.axisLabelHeight,
+	        curveSegments: this.options.axisLabelCurveSegments,
+	        font: this.options.axisLabelFont,
+	        bevelThickness: this.options.axisLabelBevelThickness,
+	        bevelSize: this.options.axisLabelBevelSize,
+	        bevelEnabled: this.options.axisLabelBevelEnabled,
+	        material: 0,
+	        extrudeMaterial: 1
+	    });
+
+	    // font: helvetiker, gentilis, droid sans, droid serif, optimer
+	    // weight: normal, bold
+
+	    var textMaterial = new THREE.MeshFaceMaterial(materialArray);
+	    var textMesh = new THREE.Mesh(textGeom, textMaterial);
+	    var textBound = getTextBound(textGeom);
+	    var gridProperties = this.getGridProperties(axis_type);
+	    setAxisMeshPosition(textMesh, axis_type, gridProperties.size * 2, textBound);
+	    return textMesh;
+	}
+
+	this.getGridProperties = function(axis_type){
+    	switch(axis_type){
+    		case AXIS_TYPE.X : return this.gridOptions.yz;
+    		case AXIS_TYPE.Y : return this.gridOptions.yz;
+    		case AXIS_TYPE.Z : return this.gridOptions.yz;   	
+    	}
+    	return null;
+	};
+
+	function getTextBound(text_geom) {
+		text_geom.computeBoundingBox();
+		return {
+	    	Width  : text_geom.boundingBox.max.x - text_geom.boundingBox.min.x,
+	    	Height : text_geom.boundingBox.max.y - text_geom.boundingBox.min.y
+	    };
+	}
+
+	function setAxisMeshPosition(text_mesh, axis_type, grid_size, text_bound){
+    	switch(axis_type){
+    		case AXIS_TYPE.X:
+	    		text_mesh.position.set(grid_size + 10, 0, 0);
+    		break;
+    		case AXIS_TYPE.Y:
+	    		text_mesh.position.set(0, grid_size + text_bound.Height / 2, text_bound.Width  / 2);
+    			text_mesh.rotation.y = Math.PI / 4;
+    		break;
+    		case AXIS_TYPE.Z:
+	    		text_mesh.position.set(0, 0, grid_size + text_bound.Width + 10);
+    			text_mesh.rotation.y = Math.PI / 2;
+    		break;
+    	}
+	}
+
+	this.getAxisNumber = function(axis_type, pos, value_text){
+	    var materialFront = new THREE.MeshBasicMaterial({
+	        color: 0xffffff
+	    });
+	    var materialSide = new THREE.MeshBasicMaterial({
+	        color: 0x000000
+	    });
+	    var materialArray = [materialFront, materialSide];
+
+	    var textGeom = new THREE.TextGeometry(value_text, {
+	        size : 5,
+	        height: 4,
+	        curveSegments: 0,
+	        font: 'helvetiker',
+	        bevelThickness: 1,
+	        bevelSize: 2,
+	        bevelEnabled: true,
+	        material: 0,
+	        extrudeMaterial: 1
+	    });
+
+	    // font: helvetiker, gentilis, droid sans, droid serif, optimer
+	    // weight: normal, bold
+
+	    var textMaterial = new THREE.MeshFaceMaterial(materialArray);
+	    var textMesh = new THREE.Mesh(textGeom, textMaterial);
+	    var textBound = getTextBound(textGeom);
+	    var gridProperties = this.getGridProperties(axis_type);
+	    setAxisMeshPosition(textMesh, axis_type, pos, textBound);
+	    return textMesh;
+	}	
 
 	function getGeometry(item_type, size, position){
 		function getSphereGeometry(radius){

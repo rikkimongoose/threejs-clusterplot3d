@@ -9,15 +9,8 @@
 		<link rel=stylesheet href="css/jquery-ui.css" />
 
 		<script src="js/three.min.js"></script>
-		<script src="js/Detector.js"></script>
-		<script src="js/Stats.js"></script>
-		<script src="js/OrbitControls.js"></script>
-		<script src="js/THREEx.KeyboardState.js"></script>
-		<script src="js/THREEx.FullScreen.js"></script>
-		<script src="js/THREEx.WindowResize.js"></script>
 
-		<script src="js/THREEx.Plot3dColors.js"></script>
-		<script src="js/THREEx.Plot3d.js"></script>
+		<script src="js/THREEx.Plot3d.full.js"></script>
 	</head>
 	<body>
 	<div id="ThreeJSBackground" style="z-index: 1; left:0px; top:0px;">
@@ -11729,7 +11722,13 @@
 			var plot = THREEx.doPlot3d("ThreeJS",
 				sourceData,
 				{ color: 2 },
-				{ colorBackgroundBox : 0x000000, itemViewMode : THREEx.CONST_ITEMS_MODE.PARTICLE },
+				{
+					colorBackgroundBox : 0x000000,
+					itemViewMode : THREEx.CONST_ITEMS_MODE.PARTICLE,
+					axisLabelFrontColor : 0x000000,
+					axisLabelSideColor : 0xffffff,
+					axisLabelBevelSize : 1
+				},
 				function(o, e) {
 					$('#ThreeJSBackground-Text').html('Loading ' + index + ' of ' + sourceDataLen);
 					index++;
