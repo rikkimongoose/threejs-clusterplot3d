@@ -1029,7 +1029,7 @@ THREEx.WindowResize	= function(renderer, camera){
 	};
 }
 
-// ../src/THREEx.Plot3dColors.js
+// ../src/THREEx.Plot3d.Colors.js
 
 /*
 ThreeJS Cluster Plot 3D
@@ -1200,7 +1200,7 @@ THREEx.getColorsRange = function(n, palette) {
 		default                                  : return hslPalette(n);
 	}
 };
-// ../src/THREEx.Plot3d.js
+// ../src/THREEx.Plot3d.Main.js
 
 /*
 ThreeJS Cluster Plot 3D
