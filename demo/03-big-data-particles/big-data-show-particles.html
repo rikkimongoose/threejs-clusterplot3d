@@ -9,6 +9,19 @@
 		<link rel=stylesheet href="css/jquery-ui.css" />
 
 		<script src="js/three.min.js"></script>
+		
+		<script src="js/fonts/droid/droid_sans_bold.typeface.js"></script>
+		<script src="js/fonts/droid/droid_sans_mono_regular.typeface.js"></script>
+		<script src="js/fonts/droid/droid_sans_regular.typeface.js"></script>
+		<script src="js/fonts/droid/droid_serif_bold.typeface.js"></script>
+		<script src="js/fonts/droid/droid_serif_regular.typeface.js"></script>
+		<script src="js/fonts/gentilis_bold.typeface.js"></script>
+		<script src="js/fonts/gentilis_regular.typeface.js"></script>
+		<script src="js/fonts/helvetiker_bold.typeface.js"></script>
+		<script src="js/fonts/helvetiker_regular.typeface.js"></script>
+		<script src="js/fonts/optimer_bold.typeface.js"></script>
+		<script src="js/fonts/optimer_regular.typeface.js"></script>
+		
 		<script src="js/Detector.js"></script>
 		<script src="js/Stats.js"></script>
 		<script src="js/OrbitControls.js"></script>
@@ -11729,7 +11742,13 @@
 			var plot = THREEx.doPlot3d("ThreeJS",
 				sourceData,
 				{ color: 2 },
-				{ colorBackgroundBox : 0x000000, itemViewMode : THREEx.CONST_ITEMS_MODE.PARTICLE },
+				{
+					colorBackgroundBox : 0x000000,
+					itemViewMode : THREEx.CONST_ITEMS_MODE.PARTICLE,
+					axisLabelFrontColor : 0x000000,
+					axisLabelSideColor : 0xffffff,
+					axisLabelBevelSize : 1
+				},
 				function(o, e) {
 					$('#ThreeJSBackground-Text').html('Loading ' + index + ' of ' + sourceDataLen);
 					index++;
