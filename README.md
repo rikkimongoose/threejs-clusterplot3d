@@ -2,9 +2,46 @@ threejs-clusterplot3d
 =====================
 Трёхмерный график для кластерного анализа на JavaScript. Основан на библиотеке [ThreeJS](http://threejs.org/) для WebGL.
 
+## Использование
+
+Проще всего рисовать график функцией THREEx.doPlot3d:
+
+**THREEx.doPlot3d(containerId, data, dataOptions, plotOptions, onItemLoad, onItemsLoad, onBeforeLoad, onPlotHover, onPlotHoverOut)**
+
+Параметры:
+
+* **containerId** — id элемента, в который следует поместить график.
+* **data** — данные для графика. Массив, состоящий из массивов или объектов. 
+* **dataOptions** — настройки отображения данных.
+* **plotOptions** — настройки графика. *Не обязательный*.
+* **onItemLoad** — функция обратного вызова. Выполняется, когда на график добавляется элемент. *Не обязательный*.
+* **onItemsLoad** — функция обратного вызова. Выполняется, когда добавление элементов на график завершено. *Не обязательный*.
+* **onBeforeLoad** — функция обратного вызова. Выполняется перед началом загрузки элементов. *Не обязательный*.
+* **onPlotHover** — функция обратного вызова. Выполняется, когда происходит выделение элемента. *Не обязательный*.
+* **onPlotHoverOut** — функция обратного вызова. Выполняется, когда выделение элемент больше не выделен. *Не обязательный*.
+
+Пример использования:
+
+```javascript
+	$(function() {
+    var sourceData = [
+      [0,0,0,5, "color1"],
+      [10,10,10,5, "color2"],
+      [20, 20, 20, 5, "color3"]
+    ];
+    var plot = THREEx.doPlot3d(
+      "ThreeJS",
+      sourceData,
+      { color : 4, type_const : THREEx.PLOT_TYPE.ITEM.SPHERE },
+      { x : 0, y : 1, z : 2, size : 3 }
+    );
+});
+```
+
 ## Настройки
 
-### Опции данных
+### Опции данных (dataOptions)
+
 * **title** — Название элемента данных. По умолчанию *null*.
 * **x** — Индекс в исходных данных для значений по оси X. По умолчанию *0*.
 * **y** — Индекс в исходных данных для значений по оси Y. По умолчанию *0*.
@@ -18,11 +55,11 @@ threejs-clusterplot3d
   - *THREEx.PLOT_TYPE.MATERIAL.PHONG*
 * **size** — Размер элементов. По умолчанию *1*.
 * **type** — Форма элемента. Выполняется, если **itemViewMode** установлено в *THREEx.CONST_ITEMS_MODE.GEOMETRY*. По умолчанию *THREEx.PLOT_TYPE.ITEM.CUBE*. Доступные значения:
-  - *THREEx.PLOT_TYPE.MATERIAL.SPHERE*
-  - *THREEx.PLOT_TYPE.MATERIAL.CUBE*
-  - *THREEx.PLOT_TYPE.MATERIAL.BAR*
+  - *THREEx.PLOT_TYPE.MATERIAL.SPHERE* — сфера
+  - *THREEx.PLOT_TYPE.MATERIAL.CUBE* — куб
+  - *THREEx.PLOT_TYPE.MATERIAL.BAR* — столбец
 
-### Опции графика
+### Опции графика (plotOptions)
 
 #### Фон
 
