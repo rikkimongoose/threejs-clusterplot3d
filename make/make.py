@@ -1,5 +1,6 @@
 import os.path, sys, fnmatch, shutil
 import httplib, urllib, urllib2
+import getopt
 
 def show_msg(text):
 	sys.stdout.write(text)
@@ -75,6 +76,7 @@ def combine_files():
 		"../src/external/THREEx.WindowResize.js",
 
 		"../src/THREEx.Plot3d.Colors.js",
+		"../src/THREEx.UrlUtils.js",
 		"../src/THREEx.Plot3d.Main.js",
 	]
 
@@ -117,28 +119,21 @@ def combine_files():
 	else:
 		show_err('Unable to minify file. Updating minified versions is aborted.')
 
-def get_git_comment():
-	max_attempts = 5
-	comment = ""
-	while not len(comment):
-		show_msg("Git comment: ")
-		comment = do_read()
-		if not comment: show_err("Git comment can't be empty\n")
-		max_attempts -= 1
-		if not max_attempts:
-			show_err("No comment was entered. Git commit is aborted.\n")
-			return None
-	return comment
+def usage():
+	help_msg = "Combines all used JS modules in same javascript file and minify it."
+	show_msg(help_msg)
 
-def git_commit():
-	comment = get_git_comment()
-	if comment is None: return
-	current_path = os.path.realpath(__file__);
-	current_path_level_up = os.path.abspath(current_path, '..', '/')
-	os.path.dirname(current_path_level_up)
-	os.system("git add .")
-	os.system("git commit -am '%s'")
+def main():
+    do_git_commit = False
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], "gh", ["git", "help"])
+    except getopt.GetoptError as err:
+        show_err(err)
+        usage()
+    for o, a in opts:
+        if o == "-h":
+            usage()
+    combine_files()
 
 if __name__ == "__main__":
-	combine_files()
-	#git_commit()
+	main()
