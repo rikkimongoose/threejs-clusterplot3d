@@ -76,6 +76,7 @@ def combine_files():
 		"../src/external/THREEx.WindowResize.js",
 
 		"../src/THREEx.Plot3d.Colors.js",
+		"../src/THREEx.UrlUtils.js",
 		"../src/THREEx.Plot3d.Main.js",
 	]
 
@@ -128,12 +129,11 @@ def main():
         opts, args = getopt.getopt(sys.argv[1:], "gh", ["git", "help"])
     except getopt.GetoptError as err:
         show_err(err)
-    	usage()
+        usage()
     for o, a in opts:
         if o == "-h":
             usage()
-
-	combine_files()
+    combine_files()
 
 if __name__ == "__main__":
 	main()
