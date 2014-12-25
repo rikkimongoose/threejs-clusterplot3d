@@ -18,12 +18,31 @@ threejs-clusterplot3d
 * **onItemsLoad** — функция обратного вызова. Выполняется, когда добавление элементов на график завершено. *Не обязательный*.
 * **onBeforeLoad** — функция обратного вызова. Выполняется перед началом загрузки элементов. *Не обязательный*.
 * **onPlotHover** — функция обратного вызова. Выполняется, когда происходит выделение элемента. *Не обязательный*.
-* **onPlotHoverOut** — функция обратного вызова. Выполняется, когда выделение элемент больше не выделен. *Не обязательный*.
+* **onPlotHoverOut** — функция обратного вызова. Выполняется, когда с элемента убирается выделение. *Не обязательный*.
 
 Пример использования:
+```html
+<style>
+    canvas { width: 100%; height: 100% }
+</style>
+<script src="js/jquery-1.9.1.js"></script>
+<script src="js/jquery-ui.js"></script>
+<link rel=stylesheet href="css/jquery-ui.css" />
+
+<div id="ThreeJS" style="z-index: 2; left:0px; top:0px; width: 100%; height:100%;"></div>
+```
+
+Добавляем библиотеки:
+
+```html
+<script src="js/three.min.js"></script>
+<script src="js/THREEx.Plot3d.min.js"></script>
+```
+
+И отрисовываем:
 
 ```javascript
-	$(function() {
+$(function() {
     var sourceData = [
       [0,0,0,5, "color1"],
       [10,10,10,5, "color2"],
@@ -38,14 +57,49 @@ threejs-clusterplot3d
 });
 ```
 
+Если элементов данных достаточно много (больше нескольких сотен), то разумно использовать режим "частичек". Например, так:
+
+```javascript
+$(function() {
+    var sourceData = [
+        [4, 59, 1],
+        [4, 50, 1],
+        [1, 40, 1],
+        
+        //...10000 elements more...
+        
+        [111, 0, 0],
+    ];
+    
+    var plot = THREEx.doPlot3d(
+        "ThreeJS",
+        sourceData,
+        { color: 2 },
+        {
+            colorBackgroundBox : 0x000000,
+            itemViewMode : THREEx.CONST_ITEMS_MODE.PARTICLE,
+            axisLabelFrontColor : 0x000000,
+            axisLabelSideColor : 0xffffff,
+            axisLabelBevelSize : 1
+        }
+    );
+});
+```
+
 ## Настройки
 
 ### Опции данных (dataOptions)
 
+В значении указывается индекс исходного массива данных, который и определяет параметр. Если его необходимо фиксировать, параметр указывается с постфиксом **_const**. Например:
+
+```javascript
+{ color: 2, material_const : THREEx.PLOT_TYPE.MATERIAL.BASIC }
+```
+
 * **title** — Название элемента данных. По умолчанию *null*.
 * **x** — Индекс в исходных данных для значений по оси X. По умолчанию *0*.
-* **y** — Индекс в исходных данных для значений по оси Y. По умолчанию *0*.
-* **z** — Индекс в исходных данных для значений по оси Z. По умолчанию *0*.
+* **y** — Индекс в исходных данных для значений по оси Y. По умолчанию *1*.
+* **z** — Индекс в исходных данных для значений по оси Z. По умолчанию *2*.
 * **color** — Цвет элемента данных на графике. По умолчанию *0xff0000* (красный).
 * **outlineColor** — Цвет гало элемента данных. По умолчанию *null*.
 * **outlineExpand** — Коэффициент размера гало по сравнению с самим объектом. По умолчанию *1.2*. Выполняется только в том случае, если установлен **outlineColor**.
@@ -53,7 +107,7 @@ threejs-clusterplot3d
   - *THREEx.PLOT_TYPE.MATERIAL.BASIC*
   - *THREEx.PLOT_TYPE.MATERIAL.LAMBER*
   - *THREEx.PLOT_TYPE.MATERIAL.PHONG*
-* **size** — Размер элементов. По умолчанию *1*.
+* **size** — Размер элементов. По умолчанию *3*.
 * **type** — Форма элемента. Выполняется, если **itemViewMode** установлено в *THREEx.CONST_ITEMS_MODE.GEOMETRY*. По умолчанию *THREEx.PLOT_TYPE.ITEM.CUBE*. Доступные значения:
   - *THREEx.PLOT_TYPE.MATERIAL.SPHERE* — сфера
   - *THREEx.PLOT_TYPE.MATERIAL.CUBE* — куб
