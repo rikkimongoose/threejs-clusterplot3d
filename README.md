@@ -4,7 +4,7 @@ threejs-clusterplot3d
 
 ## Использование
 
-Проще всего рисовать график функцией THREEx.doPlot3d:
+Проще всего рисовать график функцией **THREEx.doPlot3d** (аналогично функциям из jQuery):
 
 **THREEx.doPlot3d(containerId, data, dataOptions, plotOptions, onItemLoad, onItemsLoad, onBeforeLoad, onPlotHover, onPlotHoverOut)**
 
@@ -85,6 +85,55 @@ $(function() {
     );
 });
 ```
+
+## Другие функции и объекты
+
+### THREEx.ClusterPlot3d
+
+Основной объект библиотеки. Расширение для THREE.js, рисует 3-хмерные кластерные графики.
+
+Функция **THREEx.doPlot3d** — обёртка над этим классом, чтобы создавать график за один вызов.
+
+Класс поддерживает цепочки вызовов.
+
+Пример использования:
+
+```javascript
+var data = [
+    [0,0,0,5, "color1"],
+    [10,10,10,5, "color2"],
+    [20, 20, 20, 5, "color3"]
+];
+var containerId = "ThreeJS";
+var plotOptions = {};
+var dataOptions = { color : 4, type_const : THREEx.PLOT_TYPE.ITEM.SPHERE },
+
+var cluster3d = new THREEx.ClusterPlot3d(plotOptions)
+    .doDrawBackground(containerId)
+    .doParseData(data, dataOptions)
+    .doDrawData();
+```
+
+Методы класса:
+
+* **THREEx.ClusterPlot3d(plotOptions)** — конструктор класса. В *plotOptions* указываются настройки графика.
+* **doDrawBackground(elemId)** — отобразить фон и координатную сетку на DOM-элемент c id, указанном в параметре *elemId*.
+* **doClear()** — очистить график
+* **doParseData(data, dataOptions)** — загрузить данные для отрисовки. Данные загружаются в виде массива, который передаётся в параметре **data**. **dataOptions** задают параметры отображения.
+* **doDrawData()** — отобразить данные на график
+
+Методы обработки событий 
+
+* **addEvent(eventTitle, func)** — добавить функцию-обработчик *func* для события *eventTitle*. Название события передаётся в строке, например: *'onItemLoad'*
+* **execEvent(eventTitle, e)** — выполнить функции-обработчики для события *eventTitle*, передавая им параметр *e*.
+
+Доступные события:
+
+* *onItemLoad* — выполняется, когда на график добавляется элемент
+* *onItemsLoaded* — выполняется, когда добавление элементов на график завершено
+* *onBeforeLoad* — выполняется перед началом загрузки элементов
+* *onPlotHover* — выполняется, когда происходит выделение элемента
+* *onPlotHoverOut* — выполняется, когда с элемента убирается выделение
 
 ## Настройки
 
