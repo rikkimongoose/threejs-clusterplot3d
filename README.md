@@ -1,26 +1,36 @@
 threejs-clusterplot3d
 =====================
-Трёхмерный график для кластерного анализа на JavaScript. Основан на библиотеке [ThreeJS](http://threejs.org/) для WebGL.
+Interactive 3D plot for cluster analysis for JavaScript. Based on [ThreeJS](http://threejs.org/) for WebGL.
 
-## Использование
+## Usage
 
-Проще всего рисовать график функцией **THREEx.doPlot3d** (аналогично функциям из jQuery):
+The simplest way to draw the plot is using the function **THREEx.doPlot3d** (same as it's used in jQuery):
 
 **THREEx.doPlot3d(containerId, data, dataOptions, plotOptions, onItemLoad, onItemsLoad, onBeforeLoad, onPlotHover, onPlotHoverOut)**
 
-Параметры:
+Paramd:
 
-* **containerId** — id элемента, в который следует поместить график.
-* **data** — данные для графика. Массив, состоящий из массивов или объектов. 
-* **dataOptions** — настройки отображения данных.
-* **plotOptions** — настройки графика. *Не обязательный*.
-* **onItemLoad** — функция обратного вызова. Выполняется, когда на график добавляется элемент. *Не обязательный*.
-* **onItemsLoad** — функция обратного вызова. Выполняется, когда добавление элементов на график завершено. *Не обязательный*.
-* **onBeforeLoad** — функция обратного вызова. Выполняется перед началом загрузки элементов. *Не обязательный*.
-* **onPlotHover** — функция обратного вызова. Выполняется, когда происходит выделение элемента. *Не обязательный*.
-* **onPlotHoverOut** — функция обратного вызова. Выполняется, когда с элемента убирается выделение. *Не обязательный*.
+* **containerId** — id of DOM element for the plot.
+* **data** — plot data. Array of indexed collections (objects or arrays) is required.
+* **dataOptions** — data view options.
+* **plotOptions** — plot options. *Optional*.
+* **onItemLoad** — callback function. Executes, when new element is added to plot. *Optional*.
+* **onItemsLoad** — callback function. Executes, when adding of elements to the plot is completed. *Optional*.
+* **onBeforeLoad** — callback function. Executes before the loading of elements is started. *Optional*.
+* **onPlotHover** — callback function. Executes, when an element in selected. *Optional*.
+* **onPlotHoverOut** — callback function. Executes, when the selection is off. *Optional*.
+ 
+Example:
 
-Пример использования:
+Add libraries:
+
+```html
+<script src="js/three.min.js"></script>
+<script src="js/THREEx.Plot3d.min.js"></script>
+```
+
+Create DOM objects:
+
 ```html
 <style>
     canvas { width: 100%; height: 100% }
@@ -32,14 +42,7 @@ threejs-clusterplot3d
 <div id="ThreeJS" style="z-index: 2; left:0px; top:0px; width: 100%; height:100%;"></div>
 ```
 
-Добавляем библиотеки:
-
-```html
-<script src="js/three.min.js"></script>
-<script src="js/THREEx.Plot3d.min.js"></script>
-```
-
-И отрисовываем:
+Draw:
 
 ```javascript
 $(function() {
@@ -57,7 +60,7 @@ $(function() {
 });
 ```
 
-Если элементов данных достаточно много (больше нескольких сотен), то разумно использовать режим "частичек". Например, так:
+If there're a lot of elements (>200), it's better to use particle mode:
 
 ```javascript
 $(function() {
@@ -66,7 +69,7 @@ $(function() {
         [4, 50, 1],
         [1, 40, 1],
         
-        //...10000 elements more...
+        //...1 000 elements more...
         
         [111, 0, 0],
     ];
@@ -86,17 +89,17 @@ $(function() {
 });
 ```
 
-## Другие функции и объекты
+## Other functions and objects
 
 ### THREEx.ClusterPlot3d
 
-Основной объект библиотеки. Расширение для THREE.js, рисует 3-хмерные кластерные графики.
+Main object of this library. Extends THREE.js with interactive 3D cluster plot object.
 
-Функция **THREEx.doPlot3d** — обёртка над этим классом, чтобы создавать график за один вызов.
+Function **THREEx.doPlot3d** covers this class, letting to create the plot with one call.
 
-Класс поддерживает цепочки вызовов.
+Class supports methods chaining.
 
-Пример использования:
+Example:
 
 ```javascript
 var data = [
@@ -114,124 +117,124 @@ var cluster3d = new THREEx.ClusterPlot3d(plotOptions)
     .doDrawData();
 ```
 
-Методы класса:
+Class methods:
 
-* **THREEx.ClusterPlot3d(plotOptions)** — конструктор класса. В *plotOptions* указываются настройки графика.
-* **doDrawBackground(elemId)** — отобразить фон и координатную сетку на DOM-элемент c id, указанном в параметре *elemId*.
-* **doClear()** — очистить график
-* **doParseData(data, dataOptions)** — загрузить данные для отрисовки. Данные загружаются в виде массива, который передаётся в параметре **data**. **dataOptions** задают параметры отображения.
-* **doDrawData()** — отобразить данные на график
+* **THREEx.ClusterPlot3d(plotOptions)** — class constructor. *plotOptions* define the options for whole plot.
+* **doDrawBackground(elemId)** — draw background and coordinate box at DOM object with ID equals to *elemId*.
+* **doClear()** — clear the plot.
+* **doParseData(data, dataOptions)** — load plot data. **data** hasis array of indexed collections (arrays or objects). **dataOptions** defines the view options.
+* **doDrawData()** — show data on plot
 
-Методы обработки событий 
+Event methods:
 
-* **addEvent(eventTitle, func)** — добавить функцию-обработчик *func* для события *eventTitle*. Название события передаётся в строке, например: *'onItemLoad'*
-* **execEvent(eventTitle, e)** — выполнить функции-обработчики для события *eventTitle*, передавая им параметр *e*.
+* **addEvent(eventTitle, func)** — add event  *eventTitle*. Название события передаётся в строке, например: *'onItemLoad'*
+* **execEvent(eventTitle, e)** — execute functions for *eventTitle*, passing param *e*.
 
-Доступные события:
+Allowed events:
 
-* *onItemLoad* — выполняется, когда на график добавляется элемент
-* *onItemsLoaded* — выполняется, когда добавление элементов на график завершено
-* *onBeforeLoad* — выполняется перед началом загрузки элементов
-* *onPlotHover* — выполняется, когда происходит выделение элемента
-* *onPlotHoverOut* — выполняется, когда с элемента убирается выделение
+* *onItemLoad* — executes, when an element is added to plot.
+* *onItemsLoaded* — executes, when adding of elements to the plot is completed.
+* *onBeforeLoad* — executes before the loading of elements is started.
+* *onPlotHover* — executes when an element in selected.
+* *onPlotHoverOut* — executes when the selection is off.
 
-## Настройки
+## Options
 
-### Опции данных (dataOptions)
+### Data options (dataOptions)
 
-В значении указывается индекс исходного массива данных, который и определяет параметр. Если его необходимо фиксировать, параметр указывается с постфиксом **_const**. Например:
+Defines the index in data source element that has to be used as param on plot. If value of color, or shapem or position has to be fixed, use postfix **_const**, like this:
 
 ```javascript
 { color: 2, material_const : THREEx.PLOT_TYPE.MATERIAL.BASIC }
 ```
 
-* **title** — Название элемента данных. По умолчанию *null*.
-* **x** — Индекс в исходных данных для значений по оси X. По умолчанию *0*.
-* **y** — Индекс в исходных данных для значений по оси Y. По умолчанию *1*.
-* **z** — Индекс в исходных данных для значений по оси Z. По умолчанию *2*.
-* **color** — Цвет элемента данных на графике. По умолчанию *0xff0000* (красный).
-* **outlineColor** — Цвет гало элемента данных. По умолчанию *null*.
-* **outlineExpand** — Коэффициент размера гало по сравнению с самим объектом. По умолчанию *1.2*. Выполняется только в том случае, если установлен **outlineColor**.
-* **material** — Материал элементов. Выполняется, если **itemViewMode** установлено в *THREEx.CONST_ITEMS_MODE.GEOMETRY*. По умолчанию *THREEx.PLOT_TYPE.MATERIAL.LAMBER*. Доступные значения:
+* **title** — Data element title. Default *null*.
+* **x** — Index in source data for X axis. Default *0*.
+* **y** — Index in source data for Y axis. Default *1*.
+* **z** — Index in source data for Z axis. Default *2*.
+* **color** — Color for data element. Default value is const *0xff0000* (red).
+* **outlineColor** — Color for halo of data element. Default value is const *null*.
+* **outlineExpand** — Halo size. Default *1.2*. This param is used only if **outlineColor** is not *null*.
+* **material** — elements material. This param is used only if **itemViewMode** is equal to *THREEx.CONST_ITEMS_MODE.GEOMETRY*. Default *THREEx.PLOT_TYPE.MATERIAL.LAMBER*. Possible values:
   - *THREEx.PLOT_TYPE.MATERIAL.BASIC*
   - *THREEx.PLOT_TYPE.MATERIAL.LAMBER*
   - *THREEx.PLOT_TYPE.MATERIAL.PHONG*
-* **size** — Размер элементов. По умолчанию *3*.
-* **type** — Форма элемента. Выполняется, если **itemViewMode** установлено в *THREEx.CONST_ITEMS_MODE.GEOMETRY*. По умолчанию *THREEx.PLOT_TYPE.ITEM.CUBE*. Доступные значения:
-  - *THREEx.PLOT_TYPE.MATERIAL.SPHERE* — сфера
-  - *THREEx.PLOT_TYPE.MATERIAL.CUBE* — куб
-  - *THREEx.PLOT_TYPE.MATERIAL.BAR* — столбец
+* **size** — Element size. Default *3*.
+* **type** — Element shape. Will be changed, if **itemViewMode** is *THREEx.CONST_ITEMS_MODE.GEOMETRY*. Default *THREEx.PLOT_TYPE.ITEM.CUBE*. Possible values:
+  - *THREEx.PLOT_TYPE.MATERIAL.SPHERE* — sphere
+  - *THREEx.PLOT_TYPE.MATERIAL.CUBE* — cube
+  - *THREEx.PLOT_TYPE.MATERIAL.BAR* — vertical bar
 
-### Опции графика (plotOptions)
+### Plot options (plotOptions)
 
-#### Фон
+#### Background
 
-* **showSkybox** — Отображать фон. Без него отображается чёрный фон (по умолчанию). Это несколько ускоряет загрузку, но вызывает проблемы с перерисовкой в Internet Explorer. По умолчанию *true*.
-* **colorBackgroundBox** — Цвет фона. По умолчанию *0xffffff*.
-* **colorLight** — Цвет освещения. По умолчанию *0xffffff*.
+* **showSkybox** — Show the background skybox. If set it to *true*, you will see the default black background. There're bugs in Internet Explorer 9 when skybox is off, so it's recommended to leave default value.Default *true*.
+* **colorBackgroundBox** — Background color. Default *0xffffff*.
 
-#### Источник света
+#### Light source
 
-* **lightX** — Позиция источника света по оси X. По умолчанию *400*.
-* **lightY** — Позиция источника света по оси Y. По умолчанию *300*.
-* **lightZ** — Позиция источника света по оси Z. По умолчанию *400*.
+* **lightX** — X of light source. Default *400*.
+* **lightY** — Y of light source. Default *300*.
+* **lightZ** — Z of light source. Default *400*.
+* **colorLight** — Light color. Default *0xffffff* (white).
 
-#### Стенки
+#### Plot
 
-* **colorXZ** — Цвет стенки между X и Z. По умолчанию *0x006600*.
-* **colorXZCentral** — Цвет центральных линий между X и Z. По умолчанию *0x00ff00*.
-* **сolorXY** — Цвет стенки между X и Z. По умолчанию *0x000066*.
-* **colorXYCentral** — Цвет центральных линий между X и Z. По умолчанию *0x0000ff*.
-* **сolorYZ** — Цвет стенки между X и Z. По умолчанию *0x660000*.
-* **colorYZCentral** — Цвет центральных линий между X и Z. По умолчанию *0xff0000*.
-* **stepsSize** — Размер стенки. По умолчанию *100*.
-* **stepsCount** — Количество делений на стенке. По умолчанию *20*.
+* **colorXZ** — color for box wall between X and Z. Default *0x006600*.
+* **colorXZCentral** — color for central lines of box wall between X and Z. Default *0x00ff00*.
+* **сolorXY** — color for box wall between X and Y. Default *0x000066*.
+* **colorXYCentral** — color for central lines of box wall between X and Y. Default *0x0000ff*.
+* **сolorYZ** — color for box wall between Y and Z. Default *0x660000*.
+* **colorYZCentral** — color for central lines of box wall between Y and Z. Default *0xff0000*.
+* **stepsSize** — Box wall size. Default *100*.
+* **stepsCount** — Box wall element size. Default *20*.
 
-#### Данные
+#### Data
 
-* **stratch** — Растягивать набор элементов вдоль координатной оси. По умолчанию *true*.
-* **showGrids** — Показывать стенки графика. По умолчанию *true*.
+* **stratch** — Stratch elements by plot. Default *true*.
+* **showGrids** — show box walls. Default *true*.
 
-#### Камера
+#### Camera
 
-* **cameraX** — Позиция камеры по оси X. По умолчанию *400*.
-* **cameraY** — Позиция камеры по оси Y. По умолчанию *300*.
-* **cameraZ** — Позиция камеры по оси Z. По умолчанию *400*.
-* **cameraAngle** — Угол камеры (в градусах). По умолчанию *45*.
+* **cameraX** — X of camera position. Default *400*.
+* **cameraY** — Y of camera position. Default *300*.
+* **cameraZ** — Z of camera position. Default *400*.
+* **cameraAngle** — camera angle (degrees). Default *45*.
 
-#### Цвет и отрисовка
-* **palette** — Палитра отображения. По умолчанию *THREEx.COLOR_PALETTE_TYPE.HSL*. Доступные варианты:
-  - *THREEx.COLOR_PALETTE_TYPE.HSL* — все возможные цвета от красного до фиолетового
-  - *THREEx.COLOR_PALETTE_TYPE.SEMAPHORE* — Красный-Жёлтый-Зелёный и промежутки между ними
-  - *THREEx.COLOR_PALETTE_TYPE.ICE* — тёплые оттенки
-  - *THREEx.COLOR_PALETTE_TYPE.HOT* — холодные оттенки
+#### Palette
+* **palette** — Plot palette. Default *THREEx.COLOR_PALETTE_TYPE.HSL*. Possible variants:
+  - *THREEx.COLOR_PALETTE_TYPE.HSL* — all possible colors (based on HSL palette)
+  - *THREEx.COLOR_PALETTE_TYPE.SEMAPHORE* — Reg-Yellow-Green and all of colors between
+  - *THREEx.COLOR_PALETTE_TYPE.ICE* — warm shades
+  - *THREEx.COLOR_PALETTE_TYPE.HOT* — cold shades
 
-* **highlightSelected** — Подсвечивать выделенный элемент. По умолчанию *true*. В режиме *THREEx.CONST_ITEMS_MODE.PARTICLE* подсветка не работает.
-* **selectedItemColor** — Цвет подсветки выделенного элемента. По умолчанию *0xffffff*.
-* **itemViewMode** — Режим отрисовки элементов. По умолчанию *THREEx.CONST_ITEMS_MODE.GEOMETRY*. Доступные варианты:
-  - *THREEx.CONST_ITEMS_MODE.GEOMETRY* — стандартное рисование. Доступны различные виды материалов, поддерживается выделение элемента.
-  - *THREEx.CONST_ITEMS_MODE.PARTICLE* — рисование в режиме "частичек". Значительно быстрее, не поддерживается смена материала и выделение элемента.
+* **highlightSelected** — Hightlight the selected element. Default *true*. If mode is *THREEx.CONST_ITEMS_MODE.PARTICLE* highlighting doesn't work.
+* **selectedItemColor** — Color of selected element's highlighting. Default *0xffffff*.
+* **itemViewMode** — Element's drawing mode. Default *THREEx.CONST_ITEMS_MODE.GEOMETRY*. Posible variants:
+  - *THREEx.CONST_ITEMS_MODE.GEOMETRY* — standart geometry. Different materials are allowed, the selection of element is supported.
+  - *THREEx.CONST_ITEMS_MODE.PARTICLE* — drawing in particicles mode. No support of materials or element selection, but works much better for a lot of elements (>1 000).
 
-#### Подписи осей
+#### Axis labels
 
-* **showAxisLabels** — Показывать подписи осей. По умолчанию *true*.
-* **axisLabelX** — Подпись оси X | *x* |
-* **axisLabelY** — Подпись оси Y | *y*|
-* **axisLabelZ** — Подпись оси Z | *z* |
+* **showAxisLabels** — Show axis labels. Default *true*.
+* **axisLabelX** — Label for axis X. Default *x*.
+* **axisLabelY** — Label for axis Y. Default *y*.
+* **axisLabelZ** — Label for axis Z. Default *z*.
 
-##### Шрифты подписи осей
+##### Axis label font
 
-* **axisLabelFont** — Шрифт подписи осей. По умолчанию *THREEx.FONT.helvetiker*. Доступные шрифты:
+* **axisLabelFont** — Axis label font. Default *THREEx.FONT.helvetiker*. Allowed:
   - *THREEx.CONST_ITEMS_MODE.gentilis*
   - *THREEx.CONST_ITEMS_MODE.helvetiker*
   - *THREEx.CONST_ITEMS_MODE.optimer*
   - *THREEx.CONST_ITEMS_MODE.droid_sans*
   - *THREEx.CONST_ITEMS_MODE.droid_serif*
-* **axisLabelCurveSegments** — Количество сегментов в подписе осей. По умолчанию *0*.
-* **axisLabelFrontColor** — Центральный цвет в подписи осей. По умолчанию *0xffffff*.
-* **axisLabelSideColor** — Боковой цвет в подписи осей. По умолчанию *0x000000*.
-* **axisLabelSize** — Размер подписи осей. По умолчанию *18*.
-* **axisLabelHeight** — Настрочная высота. По умолчанию *4*.
-* **axisLabelBevelEnabled** — Использовать окантовку. По умолчанию *true*.
-* **axisLabelBevelSize** — Размер окантовки. По умолчанию *2*.
-* **axisLabelBevelThickness** — Толщина окантовки. По умолчанию *1*.
+* **axisLabelCurveSegments** — Curve segments. Default *0*.
+* **axisLabelFrontColor** — Middle color for axis label. Default *0xffffff*.
+* **axisLabelSideColor** — Side color for axis label. Default *0x000000*.
+* **axisLabelSize** — Label size. Default *18*.
+* **axisLabelHeight** — Label height. Default *4*.
+* **axisLabelBevelEnabled** — Use bevel. Default *true*.
+* **axisLabelBevelSize** — Bevel size. Default *2*.
+* **axisLabelBevelThickness** — Bevel thickness. Default *1*.
