@@ -215,9 +215,9 @@ var cluster3d = new THREEx.ClusterPlot3d(plotOptions)
 #### Подписи осей
 
 * **showAxisLabels** — Показывать подписи осей. По умолчанию *true*.
-* **axisLabelX** — Подпись оси X | *x* |
-* **axisLabelY** — Подпись оси Y | *y*|
-* **axisLabelZ** — Подпись оси Z | *z* |
+* **axisLabelX** — Подпись оси X. По умолчанию *x*.
+* **axisLabelY** — Подпись оси Y. По умолчанию *y*.
+* **axisLabelZ** — Подпись оси Z. По умолчанию *z*.
 
 ##### Шрифты подписи осей
 
