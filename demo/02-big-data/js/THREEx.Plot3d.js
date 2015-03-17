@@ -1052,7 +1052,7 @@ THREEx.COLOR_PALETTE_TYPE = {
 	HOT : 4
 };
 THREEx.getColorsRange = function(n, palette) {
-	if(typeof palette == 'undefined' || !palette)
+	if(typeof palette === undefined || !palette)
 		palette = THREEx.COLOR_PALETTE_TYPE.HSL;
 
 	function isOnePointZero(n) {
@@ -1231,12 +1231,12 @@ THREEx.UrlUtils = {
 	getUrlVar : function(key) {
 		if(!key) return null;
 		if(!this.urlVars) this.urlVars = this.urlVars();
-		return (typeof(this.urlVars[key]) != "undefined") ? this.urlVars[key] : null;
+		return (this.urlVars[key] !== undefined) ? this.urlVars[key] : null;
 	},
 	toUrlVar : function(url, params) {
 		var url_val = url || window.location.href.slice(0, window.location.href.indexOf('?'));
 		var dict_params = params || this.urlVars;
-		if(typeof dict_params == 'undefined' || !dict_params)
+		if(dict_params === undefined || !dict_params)
 			return url_val;
 		var params_str = "";
 		for(var param_key in dict_params) {
@@ -1266,7 +1266,7 @@ var THREEx	= THREEx || {};
 /*
 * Store all created 3D plots
 */
-if(typeof THREEx._plots3d == 'undefined') {
+if(THREEx._plots3d === undefined) {
 	THREEx._plots3d = [];
 }
 
@@ -1395,9 +1395,9 @@ THREEx.ClusterPlot3d = function(plotOptions) {
 
 	this.options = {};
 
-	if(typeof plotOptions != 'undefined'){
+	if(plotOptions !== undefined){
 		for(var opt_key in defaultPlotOptions)
-			this.options[opt_key] = (typeof plotOptions[opt_key] != 'undefined') ? plotOptions[opt_key] : defaultPlotOptions[opt_key];
+			this.options[opt_key] = (plotOptions[opt_key] !== undefined) ? plotOptions[opt_key] : defaultPlotOptions[opt_key];
 	} else {
 		for(var opt_key in defaultPlotOptions)
 			this.options[opt_key] = defaultPlotOptions[opt_key];
@@ -1536,7 +1536,7 @@ THREEx.ClusterPlot3d = function(plotOptions) {
 						var intersectObj = intersects[interIndex].object;
 						if ( intersectObj != this.intersected && intersectObj.name ) 
 						{
-							if (this.intersected && typeof this.intersected.currentHex != 'undefined' && this.intersected.currentHex){
+							if (this.intersected && this.intersected.currentHex !== undefined && this.intersected.currentHex){
 								this.intersected.material.color.setHex( this.intersected.currentHex );
 							}
 							
@@ -1981,33 +1981,33 @@ THREEx.ClusterPlot3d = function(plotOptions) {
 						if(ignoredValues.indexOf(key) > 0)
 							continue;
 						var itemVal = item[key];
-						if(typeof itemVal == 'underfined')
+						if(itemVal === undefined)
 							continue;
 						itemStr += key + ' : ' + (itemVal != null ? itemVal : 'null' ) + '\n';
 					}
 					return itemStr;
 				},
-			x : function(item) { return (typeof item[0] != 'undefined') ? item[0] : defaultRulesValues.x; },
-			y : function(item) { return (typeof item[1] != 'undefined') ? item[1] : defaultRulesValues.y; },
-			z : function(item) { return (typeof item[2] != 'undefined') ? item[2] : defaultRulesValues.z; },
-			size : function(item) { return (typeof item[3] != 'undefined') ? item[3] : defaultRulesValues.size; },
-			color : function() { return defaultRulesValues.color; },
-			outlineColor : function() { return defaultRulesValues.outlineColor; },
+			x             : function(item) { return (item[0] !== undefined) ? item[0] : defaultRulesValues.x; },
+			y             : function(item) { return (item[1] !== undefined) ? item[1] : defaultRulesValues.y; },
+			z             : function(item) { return (item[2] !== undefined) ? item[2] : defaultRulesValues.z; },
+			size          : function(item) { return (item[3] !== undefined) ? item[3] : defaultRulesValues.size; },
+			color         : function() { return defaultRulesValues.color; },
+			outlineColor  : function() { return defaultRulesValues.outlineColor; },
 			outlineExpand : function() { return defaultRulesValues.outlineExpand; },
-			material : function() { return defaultRulesValues.material; },
-			type : function() { return defaultRulesValues.type; }
+			material      : function() { return defaultRulesValues.material; },
+			type          : function() { return defaultRulesValues.type; }
 		};
 
 		function getRuleValue(ruleKey, isNormalised) {
-			if(typeof rules[ruleKey] != 'undefined'){
+			if(rules[ruleKey] !== undefined){
 				if(typeof rules[ruleKey] == 'function')
 					return { func: rules[ruleKey], isChanged : true };
 				return { func: function(item) { return item[rules[ruleKey]]; }, isChanged : true };
 			}
 			var ruleKeyConst = ruleKey + '_const';
-			if(typeof rules[ruleKeyConst] != 'undefined')
+			if(rules[ruleKeyConst] !== undefined)
 				return { func : function() { return rules[ruleKeyConst] }, isChanged : false };
-			if(typeof defaultRules[ruleKey] != 'undefined')
+			if(defaultRules[ruleKey] !== undefined)
 				return { func : defaultRules[ruleKey], isChanged : isNormalised };
 			return null;
 		}
@@ -2092,7 +2092,7 @@ THREEx.ClusterPlot3d = function(plotOptions) {
 			for(var dataKey in data) {
 				var dataItem = data[dataKey];
 				var categoryTitle = dataItem[columnKey];
-				if(typeof categoryLinks[categoryTitle] == 'undefined') {
+				if(categoryLinks[categoryTitle] === undefined) {
 					var numCategory =
 					{
 						name : categoryTitle,
@@ -2213,7 +2213,7 @@ THREEx.ClusterPlot3d.prototype.addEvent = function(eventTitle, func){
 	if(typeof func != 'function')
 		return this;
 
-	if(typeof this[eventTitle] == 'undefined'){
+	if(this[eventTitle] === undefined){
 		console.error("Plot 3D doesn't support event '%s'.", eventTitle);
 		return this;
 	}
@@ -2223,12 +2223,12 @@ THREEx.ClusterPlot3d.prototype.addEvent = function(eventTitle, func){
 };
 
 THREEx.getClusterPlotById = function(plotId) {
-	if(typeof THREEx._plots3d == 'undefined')
+	if(THREEx._plots3d === undefined)
 		return null;
 	var plotIndex = THREEx._plots3d.length;
 	while(plotIndex--){
 		var plotItem = THREEx._plots3d[plotIndex];
-		if(typeof plotIndex.id != 'undefined' && plotIndex.id == plotId)
+		if(plotIndex.id !== undefined && plotIndex.id == plotId)
 			return plotItem;
 	}
 	return null;

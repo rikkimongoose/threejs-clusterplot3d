@@ -27,12 +27,12 @@ THREEx.UrlUtils = {
 	getUrlVar : function(key) {
 		if(!key) return null;
 		if(!this.urlVars) this.urlVars = this.urlVars();
-		return (typeof(this.urlVars[key]) != "undefined") ? this.urlVars[key] : null;
+		return (this.urlVars[key] !== undefined) ? this.urlVars[key] : null;
 	},
 	toUrlVar : function(url, params) {
 		var url_val = url || window.location.href.slice(0, window.location.href.indexOf('?'));
 		var dict_params = params || this.urlVars;
-		if(typeof dict_params == 'undefined' || !dict_params)
+		if(dict_params === undefined || !dict_params)
 			return url_val;
 		var params_str = "";
 		for(var param_key in dict_params) {

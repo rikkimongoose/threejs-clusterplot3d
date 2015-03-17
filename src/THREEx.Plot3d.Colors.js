@@ -19,7 +19,7 @@ THREEx.COLOR_PALETTE_TYPE = {
 	HOT : 4
 };
 THREEx.getColorsRange = function(n, palette) {
-	if(typeof palette == 'undefined' || !palette)
+	if(typeof palette === undefined || !palette)
 		palette = THREEx.COLOR_PALETTE_TYPE.HSL;
 
 	function isOnePointZero(n) {
