@@ -36,8 +36,8 @@ THREEx.UrlUtils = {
 		return (this.urlVars[key] !== undefined) ? this.urlVars[key] : null;
 	},
 	toUrlVar : function(url, params) {
-		var url_val = url || window.location.href.slice(0, window.location.href.indexOf('?'));
-		var dict_params = params || this.urlVars;
+		var url_val = url || window.location.href.slice(0, window.location.href.indexOf('?')),
+		    dict_params = params || this.urlVars;
 		if(dict_params === undefined || !dict_params)
 			return url_val;
 		var params_str = "";

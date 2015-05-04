@@ -13,7 +13,7 @@ See updates at http://github.com/rikkimongoose/threejs-clusterplot3d
 var THREEx = THREEx || {};
 
 THREEx.VectorUtils = {
-    function doFindKoeff(paramX1, paramX2, paramY1, paramY2, xdiv){
+    findKoeff : function(paramX1, paramX2, paramY1, paramY2, xdiv){
         if(xdiv === undefined ||
             xdiv == null)
             xdiv = 1 / (paramX1 - paramX2);
@@ -21,83 +21,92 @@ THREEx.VectorUtils = {
                 koeffA : (paramY1 - paramY2) * xdiv,
                 koeffB : ((paramY2 * paramX1) - (paramY1 * paramX2)) * xdiv
             };
-    }
-
-    function doGenerateFunc(point1, point2){
-        function LinearFuncElem(koeffA, koeffB) {
-            this.koeffA = koeffA;
-            this.koeffB = koeffB;
-            this.func = function(x){
-                return this.koeffA*x + this.koeffB;
-            };
-        }
-        function LinearFunc(x_index, dim){
-            this.koeffA = new Array(dim - 1);
-            this.koeffB = new Array(dim - 1);
-            this.xIndex = x_index;
-            this.func = function(x){
-                var result = new Array(dim);
-                for(var i = 0, ki = 0; i < dim; i++){
-                    if(this.xIndex == i){
-                        result[i] = x;
-                        continue;
-                    }
-                    result[i] = this.koeffA[ki]*x + this.koeffB[ki];
-                    ki++;
-                }
-                return result;
-            }
-        }
-
-        function generateLinearFunc(point_data){
-            var linearFunc = new LinearFunc(point_data.xparam_index, point_data.params_y_len);
-            for(var i = 0; i < point_data.params_y_len; i++){
-                var koeff = doFindKoeff(p);
-            }
-            return linearFunc;
-        }
-        var point_data = this.findXParam(param1, param2);
-        var linearFunc = generateLinearFunc(point_data); 
-    }
-    return 
-    {
-    generateFunc : doGenerateFunc,
-    findKoeff : doFindKoeff,
-    findXParam : function (point1, point2){
-        var params_len = point1.length,
-            params_y_len = params_len - 1,
-            data1 = {
-                params : new Array(params_y_len),
-                paramx : null
-            },
-            data2 = {
-                params : new Array(params_y_len),
-                paramx : null
-            },
-            xparam_index = -1;
-        for(var pi = 0, parami = 0; pi < params_len; pi++){
-            //найден столбец x
-            if(xparam_index < 0 &&
-                point1[pi] != point2[pi]){
-                xparam_index = pi;
-                data1.paramx = point1[pi];
-                data2.paramx = point2[pi];
-                continue;
-            }
-            data1.params[parami] = point1[pi];
-            data2.params[parami] = point2[pi];
-            parami++;
-        }
-        //Вектора одинаковые
-        if(xparam_index < 0)
-            throw new Error("Provided points are equal. It's impossible to build a line by 2 points.");
-
+    },
+    findSector : function(x1, y1, x2, y2){
+        if(x1 == x2 && y1 == y2) return 0;
+        if(x2 <  x1 && y2 <= y1) return 1;
+        if(x2 <= x1 && y2 >  y1) return 2;
+        if(x2 >  x1 && y2 >= y1) return 3;
+        if(x2 >= x1 && y2 <  y1) return 4;
+        return 0;
+    },
+    generate3DFunc : function(point1, point2, spotlightKoeff){
         return {
-            data1 : data1,
-            data2 : data2,
-            params_y_len : params_y_len,
-            xparam_index : xparam_index
+            pointCamera : point1,
+            pointCursor : point2,
+            spotlight : spotlightKoeff || 0,
+            paramsY : this.findKoeff(point1.x, point2.x, point1.y, point2.y),
+            paramsZ : this.findKoeff(point1.x, point2.x, point1.z, point2.z),
+            funcY : function(x) { return (this.paramsY.koeffA + this.spotlight) * x + this.paramsY.koeffB; },
+            funcZ : function(x) { return (this.paramsZ.koeffA + this.spotlight) * x + this.paramsZ.koeffB; }
         };
     },
+    generateSpotlight : function(point1, point2, spotlightSize){
+        var spotlightKoeff = spotlightSize || 0.2;
+        return {
+            funcTop : this.generate3DFunc(point1, point2,  spotlightKoeff),
+            funcBtm : this.generate3DFunc(point1, point2, -spotlightKoeff)
+        };
+    },
+    checkCrossing2d : function(spotlight, objX1, objX2, objY1, objY2, sector){
+        //TODO - check crossing here
+        switch(sector){
+            case 1:
+                return true;
+            case 2:
+                return true;
+            case 3:
+                return true;
+            case 4:
+                return true;
+        }
+        return false;
+    },
+    checkCrossing : function(spotlight, pointObjTopLeft, pointObjBottomRight){
+        var pointCamera = spotlight.pointCamera,
+            pointCursor = spotlight.pointCursor,
+            sectorXY = this.findSector(pointCamera.x, pointCamera.y, pointCursor.x, pointCursor.y),
+            sectorXZ = this.findSector(pointCamera.x, pointCamera.z, pointCursor.x, pointCursor.z);
+        //Check, are cursor and point in same destination
+        if((sectorXY != this.findSector(pointCamera.x, pointCamera.y, pointObjTopLeft.x, pointObjTopLeft.y)) &&
+           (sectorXY != this.findSector(pointCamera.x, pointCamera.y, pointObjTopLeft.x, pointObjTopLeft.y))) ||
+           (sectorXZ != this.findSector(pointCamera.x, pointCamera.z, pointObjTopLeft.x, pointObjTopLeft.z))
+          )
+            return null;
 
+        // check crossing XY
+        if(!this.checkCrossing2d(spotlight,
+                pointObjTopLeft.x, pointObjBottomRight.x,
+                pointObjTopLeft.y, pointObjBottomRight.y,
+                sectorXY))
+            return null;
+
+        // check crossing XZ
+        if(!this.checkCrossing2d(spotlight,
+                pointObjTopLeft.x, pointObjBottomRight.x,
+                pointObjTopLeft.z, pointObjBottomRight.z,
+                sectorXZ))
+            return null;
+
+        //MAth.pow in Chrome is slower then multiplication
+        return  Math.sqrt(  (pointObjCenter.x - pointCamera.x) * (pointObjCenter.x - pointCamera.x) +
+                            (pointObjCenter.y - pointCamera.y) * (pointObjCenter.y - pointCamera.y) +
+                            (pointObjCenter.z - pointCamera.z) * (pointObjCenter.z - pointCamera.z) +
+                            );
+    },
+    findClosest : function(pointCamera, pointCursor, elems, spotlightSize){
+        var closestElem = null,
+            closestElemDistance = null,
+            spotlight = this.generateSpotlight(pointCamera, pointCursor, spotlightSize);
+
+        for(var i = 0, len = elems.length; i < len; i++){
+            var elem = elems[i],
+                distance = this.checkCrossing(spotlight, elem.pointTopLeft, elem.pointRightBottom);
+            if(newDistance == null) continue;
+            if(closestElem && closestElemDistance < newDistance) continue;
+            closestElem = elem;
+            closestElemDistance = distance;
+        }
+        return closestElem;
+    },
 };
