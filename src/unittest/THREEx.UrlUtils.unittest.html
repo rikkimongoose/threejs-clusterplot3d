@@ -1,0 +1,36 @@
+<html>
+    <head>
+    	<title>THREEx.UrlUtils unit test</title>
+		<script src="../THREEx.UrlUtils.js"></script>
+		<script src="js/qunit-1.18.0.js"></script>
+		<link rel=stylesheet href="css/qunit-1.18.0.css" />
+	</head>
+	<body>
+		<div id="qunit"></div>
+  		<div id="qunit-fixture"></div>
+		<script>
+		QUnit.test( "getUrlVars", function( assert ) {
+		  THREEx.UrlUtils.getUrlStr = function() {
+		  	return "foo=foo_val&boo=boo_val";
+		  };
+		  var url_vars = THREEx.UrlUtils.getUrlVars();
+		  assert.ok( url_vars["foo"] == "foo_val", "Passed!" );
+		  assert.ok( url_vars["boo"] == "boo_val", "Passed!" );
+		});
+
+		QUnit.test( "getUrlVar", function( assert ) {
+		  THREEx.UrlUtils.getUrlStr = function() {
+		  	return "foo=foo_val&boo=boo_val";
+		  };
+		  assert.ok( THREEx.UrlUtils.getUrlVar("foo") == "foo_val", "Passed!" );
+		  assert.ok( THREEx.UrlUtils.getUrlVar("boo") == "boo_val", "Passed!" );
+		  assert.ok( THREEx.UrlUtils.getUrlVar("goo") ==  null, "Passed!" );
+		});
+
+		QUnit.test( "toUrlVar", function( assert ) {
+			var url_vars = THREEx.UrlUtils.toUrlVar("http://test.com/", {"boo" : "boo_val", "foo" : "foo_val"});
+			assert.ok(url_vars == "http://test.com/?boo=boo_val&foo=foo_val", "Passed!");
+		});
+		</script>
+	</body>
+</html>

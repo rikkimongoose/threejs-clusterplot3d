@@ -10,14 +10,20 @@ See updates at http://github.com/rikkimongoose/threejs-clusterplot3d
 */
 
 /** @namespace */
-var THREEx	= THREEx || {};
+var THREEx = THREEx || {};
 
 THREEx.UrlUtils = {
+    getUrlStr : function() {
+        //used for unit test
+        return location.search.substr(1);
+    },
 	getUrlVars : function(){
-		var vars = {};
-		var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
-		var i = hashes.length;
-		while(i--) {
+		var vars = {},
+		    hashes = this.getUrlStr();
+        if(!hashes)
+            return {};
+        hashes = hashes.split('&');
+		for(var i = 0, len = hashes.length; i < len; i++) {
 			var hash = hashes[i].split('=');
 			vars[hash[0]] = hash[1];
 	  	}
@@ -26,7 +32,7 @@ THREEx.UrlUtils = {
 	urlVars : null,
 	getUrlVar : function(key) {
 		if(!key) return null;
-		if(!this.urlVars) this.urlVars = this.urlVars();
+		if(!this.urlVars) this.urlVars = this.getUrlVars();
 		return (this.urlVars[key] !== undefined) ? this.urlVars[key] : null;
 	},
 	toUrlVar : function(url, params) {
