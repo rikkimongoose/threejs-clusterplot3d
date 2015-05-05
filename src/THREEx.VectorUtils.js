@@ -38,7 +38,9 @@ THREEx.VectorUtils = {
             paramsY : this.findKoeff(point1.x, point2.x, point1.y, point2.y),
             paramsZ : this.findKoeff(point1.x, point2.x, point1.z, point2.z),
             funcY : function(x) { return (this.paramsY.koeffA + this.spotlight) * x + this.paramsY.koeffB; },
+            funcYR: function(y) { return (y - this.paramsY.koeffB) / (this.paramsY.koeffA + this.spotlight); },
             funcZ : function(x) { return (this.paramsZ.koeffA + this.spotlight) * x + this.paramsZ.koeffB; }
+            funcZR: function(z) { return (z - this.paramsZ.koeffB) / (this.paramsZ.koeffA + this.spotlight); },
         };
     },
     generateSpotlight : function(point1, point2, spotlightSize){

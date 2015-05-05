@@ -28,8 +28,7 @@ THREEx.PLOT_TYPE =
 		ITEM :
 		{
 			SPHERE : 0,
-			CUBE : 1,
-			BAR : 2
+			CUBE : 1
 		},
 		MATERIAL :
 		{
@@ -53,10 +52,6 @@ THREEx.CONST_GEO =
 			}
 		},
 		CUBE :
-		{
-			Z_DEPTH : 1
-		},
-		BAR :
 		{
 			Z_DEPTH : 1
 		},
@@ -508,15 +503,11 @@ THREEx.ClusterPlot3d = function(plotOptions) {
 		function getCubeGeometry(radius){
 			return new THREE.BoxGeometry(radius, radius, radius);
 		}
-		function getBarGeometry(radius, position){
-			return new THREE.BoxGeometry(radius, position.z - radius / 2, radius);
-		}
 
 		switch(item_type)
 		{
 			case THREEx.PLOT_TYPE.ITEM.SPHERE : return getSphereGeometry(size);
 			case THREEx.PLOT_TYPE.ITEM.CUBE   : return getCubeGeometry(size * 2);
-			case THREEx.PLOT_TYPE.ITEM.BAR    : return getBarGeometry(size, position);
 		}
 
 		return null;
@@ -573,15 +564,15 @@ THREEx.ClusterPlot3d = function(plotOptions) {
 					z : itemData.z
 				};
 
-				switch(itemData.type)
+				/*switch(itemData.type)
 				{
 					case THREEx.PLOT_TYPE.ITEM.BAR:
 						mesh.position.set(pos.x, (pos.y - itemData.size / 2) / 2, pos.z);
 						break;
-					default:
-						mesh.position.set(pos.x, pos.y, pos.z);
-					break;
-				}
+					default:*/
+				mesh.position.set(pos.x, pos.y, pos.z);
+				/*	break;
+				}*/
 
 				itemData.mesh = mesh;
 				plot.scene.add(mesh);

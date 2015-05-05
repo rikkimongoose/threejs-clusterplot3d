@@ -1214,14 +1214,20 @@ See updates at http://github.com/rikkimongoose/threejs-clusterplot3d
 */
 
 /** @namespace */
-var THREEx	= THREEx || {};
+var THREEx = THREEx || {};
 
 THREEx.UrlUtils = {
+    getUrlStr : function() {
+        //used for unit test
+        return location.search.substr(1);
+    },
 	getUrlVars : function(){
-		var vars = {};
-		var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
-		var i = hashes.length;
-		while(i--) {
+		var vars = {},
+		    hashes = this.getUrlStr();
+        if(!hashes)
+            return {};
+        hashes = hashes.split('&');
+		for(var i = 0, len = hashes.length; i < len; i++) {
 			var hash = hashes[i].split('=');
 			vars[hash[0]] = hash[1];
 	  	}
@@ -1230,12 +1236,12 @@ THREEx.UrlUtils = {
 	urlVars : null,
 	getUrlVar : function(key) {
 		if(!key) return null;
-		if(!this.urlVars) this.urlVars = this.urlVars();
+		if(!this.urlVars) this.urlVars = this.getUrlVars();
 		return (this.urlVars[key] !== undefined) ? this.urlVars[key] : null;
 	},
 	toUrlVar : function(url, params) {
-		var url_val = url || window.location.href.slice(0, window.location.href.indexOf('?'));
-		var dict_params = params || this.urlVars;
+		var url_val = url || window.location.href.slice(0, window.location.href.indexOf('?')),
+		    dict_params = params || this.urlVars;
 		if(dict_params === undefined || !dict_params)
 			return url_val;
 		var params_str = "";
@@ -1278,8 +1284,7 @@ THREEx.PLOT_TYPE =
 		ITEM :
 		{
 			SPHERE : 0,
-			CUBE : 1,
-			BAR : 2
+			CUBE : 1
 		},
 		MATERIAL :
 		{
@@ -1303,10 +1308,6 @@ THREEx.CONST_GEO =
 			}
 		},
 		CUBE :
-		{
-			Z_DEPTH : 1
-		},
-		BAR :
 		{
 			Z_DEPTH : 1
 		},
@@ -1758,15 +1759,11 @@ THREEx.ClusterPlot3d = function(plotOptions) {
 		function getCubeGeometry(radius){
 			return new THREE.BoxGeometry(radius, radius, radius);
 		}
-		function getBarGeometry(radius, position){
-			return new THREE.BoxGeometry(radius, position.z - radius / 2, radius);
-		}
 
 		switch(item_type)
 		{
 			case THREEx.PLOT_TYPE.ITEM.SPHERE : return getSphereGeometry(size);
 			case THREEx.PLOT_TYPE.ITEM.CUBE   : return getCubeGeometry(size * 2);
-			case THREEx.PLOT_TYPE.ITEM.BAR    : return getBarGeometry(size, position);
 		}
 
 		return null;
@@ -1823,15 +1820,15 @@ THREEx.ClusterPlot3d = function(plotOptions) {
 					z : itemData.z
 				};
 
-				switch(itemData.type)
+				/*switch(itemData.type)
 				{
 					case THREEx.PLOT_TYPE.ITEM.BAR:
 						mesh.position.set(pos.x, (pos.y - itemData.size / 2) / 2, pos.z);
 						break;
-					default:
-						mesh.position.set(pos.x, pos.y, pos.z);
-					break;
-				}
+					default:*/
+				mesh.position.set(pos.x, pos.y, pos.z);
+				/*	break;
+				}*/
 
 				itemData.mesh = mesh;
 				plot.scene.add(mesh);

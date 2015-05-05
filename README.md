@@ -163,7 +163,6 @@ Defines the index in data source element that has to be used as param on plot. I
 * **type** — Element shape. Will be changed, if **itemViewMode** is *THREEx.CONST_ITEMS_MODE.GEOMETRY*. Default *THREEx.PLOT_TYPE.ITEM.CUBE*. Possible values:
   - *THREEx.PLOT_TYPE.MATERIAL.SPHERE* — sphere
   - *THREEx.PLOT_TYPE.MATERIAL.CUBE* — cube
-  - *THREEx.PLOT_TYPE.MATERIAL.BAR* — vertical bar
 
 ### Plot options (plotOptions)
 

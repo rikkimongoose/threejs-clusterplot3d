@@ -160,7 +160,6 @@ var cluster3d = new THREEx.ClusterPlot3d(plotOptions)
 * **type** — Форма элемента. Выполняется, если **itemViewMode** установлено в *THREEx.CONST_ITEMS_MODE.GEOMETRY*. По умолчанию *THREEx.PLOT_TYPE.ITEM.CUBE*. Доступные значения:
   - *THREEx.PLOT_TYPE.MATERIAL.SPHERE* — сфера
   - *THREEx.PLOT_TYPE.MATERIAL.CUBE* — куб
-  - *THREEx.PLOT_TYPE.MATERIAL.BAR* — столбец
 
 ### Опции графика (plotOptions)
 
