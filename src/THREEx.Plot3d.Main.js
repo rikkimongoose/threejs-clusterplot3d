@@ -494,7 +494,7 @@ THREEx.ClusterPlot3d = function(plotOptions) {
 	    var gridProperties = this.getGridProperties(axis_type);
 	    setAxisMeshPosition(textMesh, axis_type, pos, textBound);
 	    return textMesh;
-	}	
+	}
 
 	function getGeometry(item_type, size, position){
 		function getSphereGeometry(radius){
@@ -621,19 +621,55 @@ THREEx.ClusterPlot3d = function(plotOptions) {
 				return newMaterial;
 			}
 
-			function doShowPatricles(plot, particleGroups){
+			function doShowPatriclesSphere(plot, particleGroups){
+				var PI2 = Math.PI * 2;
+
+				var programFill = function ( context ) {
+					context.beginPath();
+					context.arc( 0, 0, 0.5, 0, PI2, true );
+					context.fill();
+				};
+
 				for(var i = 0, li = particleGroups.length; i < li; i++) {
 					var particleGroup = particleGroups[i];
-					var geometry = new THREE.Geometry();
-					var material = new THREE.PointCloudMaterial({
+
+					if(particleGroup.color === undefined)
+						particleGroup.color = 0xFFFFFF;
+
+					var	geometry = new THREE.Geometry(),
+						material = new THREE.SpriteCanvasMaterial({
+							color : particleGroup.color,
+							program : programFill
+						});
+					
+					for(var j = 0, lj = particleGroup.items.length; j < lj; j++) {
+						var particleGroupData = particleGroup.items[j],
+							particle = new THREE.Sprite(material);
+						particle.position.x = particleGroupData.x;
+						particle.position.y = particleGroupData.y;
+						particle.position.z = particleGroupData.z;
+						particle.scale.x = particleGroup.size;
+						geometry.vertices.push(particle);
+						plot.execEvent('onItemLoad', { item : particle });
+					}
+					var system = new THREE.PointCloud(geometry, material);
+					plot.scene.add(system);
+				}
+			}
+
+			function doShowPatriclesCube(plot, particleGroups){
+				for(var i = 0, li = particleGroups.length; i < li; i++) {
+					var particleGroup = particleGroups[i],
+						geometry = new THREE.Geometry(),
+						material = new THREE.PointCloudMaterial({
 						size : particleGroup.size,
 						color : particleGroup.color,
 						vertexColors : false
 					});
 					
 					for(var j = 0, lj = particleGroup.items.length; j < lj; j++) {
-						var particleGroupData = particleGroup.items[j];
-						var particle = new THREE.Vector3(
+						var particleGroupData = particleGroup.items[j],
+							particle = new THREE.Vector3(
 								particleGroupData.x,
 								particleGroupData.y,
 								particleGroupData.z
@@ -646,16 +682,20 @@ THREEx.ClusterPlot3d = function(plotOptions) {
 				}
 			}
 
-			var itemDataIndex = parsedData.length;
-			var particleGroups = [];
+			var particleGroupsSphere = [],
+				particleGroupsCube = [];
 
-			while(itemDataIndex--) {
-				var itemData = parsedData[itemDataIndex];
-				var itemDataMaterial = getParticleMaterial(particleGroups, itemData);
+			for(var itemDataIndex = 0, len = parsedData.length; itemDataIndex < len; itemDataIndex++) {
+				var itemData = parsedData[itemDataIndex],
+					particleGroups = itemData.type == THREEx.PLOT_TYPE.ITEM.SPHERE ? particleGroupsSphere : particleGroupsCube,
+					itemDataMaterial = getParticleMaterial(particleGroups, itemData);
+
 				itemDataMaterial.items.push(itemData);
 			}
 
-			doShowPatricles(plot, particleGroups);
+			doShowPatriclesSphere(plot, particleGroupsSphere);
+			doShowPatriclesCube(plot, particleGroupsCube);
+
 		}
 
 		var drawingFunc = null;
