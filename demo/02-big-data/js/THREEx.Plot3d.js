@@ -1891,6 +1891,7 @@ THREEx.ClusterPlot3d = function(plotOptions) {
 
 					if(particleGroup.color === undefined)
 						particleGroup.color = 0xFFFFFF;
+					console.log(particleGroup.color);
 
 					var	geometry = new THREE.Geometry(),
 						material = new THREE.SpriteCanvasMaterial({
@@ -1905,6 +1906,7 @@ THREEx.ClusterPlot3d = function(plotOptions) {
 						particle.position.y = particleGroupData.y;
 						particle.position.z = particleGroupData.z;
 						particle.scale.x = particleGroup.size;
+						particle.scale.y = particleGroup.size;
 						geometry.vertices.push(particle);
 						plot.execEvent('onItemLoad', { item : particle });
 					}

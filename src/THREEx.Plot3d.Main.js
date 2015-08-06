@@ -631,14 +631,10 @@ THREEx.ClusterPlot3d = function(plotOptions) {
 				};
 
 				for(var i = 0, li = particleGroups.length; i < li; i++) {
-					var particleGroup = particleGroups[i];
-
-					if(particleGroup.color === undefined)
-						particleGroup.color = 0xFFFFFF;
-
-					var	geometry = new THREE.Geometry(),
+					var particleGroup = particleGroups[i],
+						geometry = new THREE.Geometry(),
 						material = new THREE.SpriteCanvasMaterial({
-							color : particleGroup.color,
+							color : particleGroup.color || 0xFFFFFF,
 							program : programFill
 						});
 					
@@ -648,7 +644,7 @@ THREEx.ClusterPlot3d = function(plotOptions) {
 						particle.position.x = particleGroupData.x;
 						particle.position.y = particleGroupData.y;
 						particle.position.z = particleGroupData.z;
-						particle.scale.x = particleGroup.size;
+						particle.scale.x = particle.scale.y = particleGroup.size;
 						geometry.vertices.push(particle);
 						plot.execEvent('onItemLoad', { item : particle });
 					}
@@ -663,7 +659,7 @@ THREEx.ClusterPlot3d = function(plotOptions) {
 						geometry = new THREE.Geometry(),
 						material = new THREE.PointCloudMaterial({
 						size : particleGroup.size,
-						color : particleGroup.color,
+						color : particleGroup.color || 0xFFFFFF,
 						vertexColors : false
 					});
 					
