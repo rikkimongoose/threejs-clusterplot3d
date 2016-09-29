@@ -8,7 +8,7 @@ The simplest way to draw the plot is using the function **THREEx.doPlot3d** (sam
 
 **THREEx.doPlot3d(containerId, data, dataOptions, plotOptions, onItemLoad, onItemsLoad, onBeforeLoad, onPlotHover, onPlotHoverOut)**
 
-Paramd:
+Params:
 
 * **containerId** — id of DOM element for the plot.
 * **data** — plot data. Array of indexed collections (objects or arrays) is required.
