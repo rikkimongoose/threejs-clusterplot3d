@@ -1,6 +1,8 @@
 threejs-clusterplot3d
 =====================
-Interactive 3D plot for cluster analysis for JavaScript. Based on [ThreeJS](http://threejs.org/) for WebGL.
+Interactive 3D plot for cluster analysis for JavaScript. Based on [ThreeJS](http://threejs.org/) for WebGL.]
+
+*The project is closed. For 3D cluster plotting check [vis](http://visjs.org) library, especially [the following example](http://visjs.org/examples/graph3d/08_dot_cloud_size.html)*
 
 ## Usage
 
